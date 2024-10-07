@@ -1,6 +1,7 @@
 // Example counter component
 export interface ElementData {
-  count: number;
+  question: string;
+  correct: string[][];
 }
 
 export interface Element {
