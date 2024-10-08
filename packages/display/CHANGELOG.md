@@ -1,5 +1,11 @@
 # @tailor-cms/ce-fill-blank-display
 
+## 0.0.3
+
+### Patch Changes
+
+- Edit count watcher has been updated to reflect change when multiple blanks are added
+
 ## 0.0.2
 
 ### Patch Changes
