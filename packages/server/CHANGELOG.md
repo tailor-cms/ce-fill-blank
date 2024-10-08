@@ -1,5 +1,11 @@
 # @tailor-cms/ce-fill-blank-server
 
+## 0.0.4
+
+### Patch Changes
+
+- Added vuedraggable to support changing the order of answers
+
 ## 0.0.3
 
 ### Patch Changes

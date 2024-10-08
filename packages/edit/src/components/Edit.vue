@@ -21,66 +21,79 @@
     <div class="text-subtitle-2 mb-2">Answers</div>
     <VInput :model-value="elementData.correct" :rules="[rules.isSynced]">
       <div class="d-flex flex-column w-100">
-        <VSlideYTransition group>
-          <div
-            v-for="(group, groupIndex) in elementData.correct"
-            :key="groupIndex"
-          >
-            <div class="d-flex mb-4">
-              <VChip
-                class="font-weight-bold"
-                color="primary-darken-3"
-                size="small"
-                variant="flat"
-                label
-              >
-                {{ groupIndex + 1 }}
-              </VChip>
-              <VSpacer />
-              <VBtn
-                v-if="!isDisabled && !isSynced"
-                class="ml-2"
-                color="secondary-darken-1"
-                prepend-icon="mdi-delete"
-                size="small"
-                variant="text"
-                rounded
-                @click="removeGroup(groupIndex)"
-              >
-                Remove answer group
-              </VBtn>
-            </div>
-            <VTextField
-              v-for="(_, answerIndex) in group"
-              :key="`${groupIndex}.${answerIndex}`"
-              v-model="elementData.correct[groupIndex][answerIndex]"
-              :readonly="isDisabled"
-              :rules="[rules.required]"
-              class="my-2"
-              placeholder="Answer..."
-            >
-              <template v-if="!isDisabled && group.length > 1" #append>
-                <VBtn
-                  aria-label="Remove answer"
-                  density="comfortable"
-                  icon="mdi-close"
-                  variant="text"
-                  @click="removeAnswer(groupIndex, answerIndex)"
+        <Draggable
+          v-model="elementData.correct"
+          :disabled="isDisabled"
+          animation="150"
+          handle=".drag-handle"
+          item-key="id"
+        >
+          <template #item="{ element: group, index: groupIndex }">
+            <div>
+              <div class="d-flex mb-4">
+                <VIcon
+                  v-if="!isDisabled"
+                  class="drag-handle"
+                  color="grey"
+                  icon="mdi-drag-vertical"
                 />
-              </template>
-            </VTextField>
-            <div v-if="!isDisabled" class="mb-4 d-flex justify-end">
-              <VBtn
-                prepend-icon="mdi-plus"
-                variant="text"
-                rounded
-                @click="addAnswer(groupIndex)"
-              >
-                Add Answer
-              </VBtn>
+                <VChip
+                  class="font-weight-bold"
+                  color="primary-darken-3"
+                  size="small"
+                  variant="flat"
+                  label
+                >
+                  {{ groupIndex + 1 }}
+                </VChip>
+                <VSpacer />
+                <VBtn
+                  v-if="!isDisabled && !isSynced"
+                  class="ml-2"
+                  color="secondary-darken-1"
+                  prepend-icon="mdi-delete"
+                  size="small"
+                  variant="text"
+                  rounded
+                  @click="removeGroup(groupIndex)"
+                >
+                  Remove answer group
+                </VBtn>
+              </div>
+              <VSlideYTransition group>
+                <VTextField
+                  v-for="(_, answerIndex) in group"
+                  :key="`${groupIndex}.${answerIndex}`"
+                  v-model="elementData.correct[groupIndex][answerIndex]"
+                  :readonly="isDisabled"
+                  :rules="[rules.required]"
+                  class="my-2"
+                  placeholder="Answer..."
+                >
+                  <template v-if="!isDisabled && group.length > 1" #append>
+                    <VBtn
+                      aria-label="Remove answer"
+                      density="comfortable"
+                      icon="mdi-close"
+                      variant="text"
+                      @click="removeAnswer(groupIndex, answerIndex)"
+                    />
+                  </template>
+                </VTextField>
+              </VSlideYTransition>
+              <div v-if="!isDisabled" class="mb-4 d-flex justify-end">
+                <VBtn
+                  prepend-icon="mdi-plus"
+                  variant="text"
+                  rounded
+                  @click="addAnswer(groupIndex)"
+                >
+                  Add Answer
+                </VBtn>
+              </div>
             </div>
-          </div>
-        </VSlideYTransition>
+          </template>
+        </Draggable>
       </div>
     </VInput>
     <div v-if="!isDisabled" class="d-flex justify-end mt-8">
@@ -96,6 +109,7 @@
 import { computed, defineEmits, defineProps, reactive, ref, watch } from 'vue';
 import { Element, ElementData } from '@tailor-cms/ce-fill-blank-manifest';
 import cloneDeep from 'lodash/cloneDeep';
+import Draggable from 'vuedraggable/src/vuedraggable';
 import isEqual from 'lodash/isEqual';
 import pullAt from 'lodash/pullAt';
 import size from 'lodash/size';
@@ -154,12 +168,16 @@ watch(
 
 watch(count, (val) => {
   const diff = val - elementData.correct.length;
-  if (diff) return elementData.correct.push(...Array(diff).fill(''));
+  if (diff > 0) return elementData.correct.push(...Array(diff).fill(['']));
 });
 </script>
 
 <style lang="scss" scoped>
 .tce-container {
   text-align: left;
+}
+
+.drag-handle {
+  cursor: pointer;
 }
 </style>
