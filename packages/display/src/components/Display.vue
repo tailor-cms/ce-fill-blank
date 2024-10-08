@@ -1,32 +1,32 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
   <VForm ref="form" class="tce-root" @submit.prevent="submit">
-    <div class="mb-4">
+    <VInput
+      :model-value="response"
+      :rules="[requiredRule]"
+      validate-on="submit"
+    >
       <template v-for="(it, i) in parsedQuestion" :key="i">
         <template v-if="typeof it === 'number'">
           <VInput
             :model-value="response[it]"
-            :rules="[requiredRule]"
+            :rules="[(val: string) => !!val]"
             class="blank"
             hide-details
           >
             <template #default="{ isValid }">
-              <VField :error="isValid.value === false" variant="outlined">
-                <input
-                  v-model="response[it]"
-                  :readonly="submitted"
-                  class="px-1"
-                />
+              <VField :error="isValid.value === false">
+                <input v-model="response[it]" :readonly="submitted" />
               </VField>
             </template>
             <template v-if="submitted" #append>
-              <VIcon v-bind="iconProps(it)" />
+              <VIcon v-bind="iconProps(it)" size="small" />
             </template>
           </VInput>
         </template>
-        <span v-else>{{ it }}</span>
+        <template v-else>{{ it }}</template>
       </template>
-    </div>
+    </VInput>
     <VAlert
       v-if="submitted"
       :text="userState?.isCorrect ? 'Correct' : 'Incorrect'"
@@ -48,9 +48,13 @@ import cloneDeep from 'lodash/cloneDeep';
 import { ElementData } from '@tailor-cms/ce-fill-blank-manifest';
 
 const BLANK = /(@blank)/g;
-const initializeResponse = () =>
-  cloneDeep(props.userState?.response) ??
-  Array(props.data.question.match(BLANK)?.length ?? 0).fill('');
+const initializeResponse = () => {
+  const blankCount = props.data.question.match(BLANK)?.length ?? 0;
+  const userResponse = cloneDeep(props.userState?.response);
+  return Array(blankCount)
+    .fill('')
+    .map((it, i) => userResponse?.[i] ?? it);
+};
 
 const props = defineProps<{ id: number; data: ElementData; userState: any }>();
 const emit = defineEmits(['interaction']);
@@ -71,16 +75,16 @@ const submit = async () => {
   if (valid) emit('interaction', { response: response.value });
 };
 
-const requiredRule = (val: string | boolean | number) => {
-  return !!val || 'You have to enter your answer.';
+const requiredRule = (val: string[]) => {
+  return val.every(Boolean) || 'You must enter all the answers.';
 };
 
 const iconProps = (index: number) => {
-  const response = props.userState.response?.[index].toLowerCase();
-  const correct = props.userState.correct?.[index].map((it: string) =>
+  const response = props.userState.response?.[index]?.toLowerCase();
+  const correct = props.userState.correct?.[index]?.map((it: string) =>
     it.toLowerCase(),
   );
-  const isCorrect = correct.includes(response);
+  const isCorrect = correct?.includes(response);
   if (isCorrect) return { icon: 'mdi-check-circle', color: 'success' };
   return { icon: 'mdi-close-circle', color: 'error' };
 };
@@ -109,12 +113,20 @@ watch(
   font-size: 1rem;
 }
 
+:deep(.v-input__control) {
+  display: block;
+}
+
 .blank {
   display: inline-flex;
   vertical-align: bottom;
 
   :deep(.v-input__append) {
     margin-inline-start: 0.25rem !important;
+  }
+
+  input {
+    padding: 0 0.25rem;
   }
 }
 </style>
