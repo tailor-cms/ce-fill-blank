@@ -23,14 +23,20 @@
     <VSlideYTransition group>
       <div v-for="(group, groupIndex) in elementData.correct" :key="groupIndex">
         <div class="d-flex mb-4">
-          <VChip class="font-weight-bold" size="small" variant="flat" label>
+          <VChip
+            class="font-weight-bold"
+            color="primary-darken-3"
+            size="small"
+            variant="flat"
+            label
+          >
             {{ groupIndex + 1 }}
           </VChip>
           <VSpacer />
           <VBtn
             v-if="!isDisabled && !isSynced"
             class="ml-2"
-            color="secondary darken-1"
+            color="secondary-darken-1"
             prepend-icon="mdi-delete"
             size="small"
             variant="text"
