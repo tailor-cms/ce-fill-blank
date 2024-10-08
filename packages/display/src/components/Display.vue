@@ -1,22 +1,32 @@
+<!-- eslint-disable vue/no-v-html -->
 <template>
   <VForm ref="form" class="tce-root" @submit.prevent="submit">
-    <div class="px-2 my-4">{{ parsedQuestion }}</div>
-    <VTextField
-      v-for="(_, index) in response"
-      :key="index"
-      v-model="response[index]"
-      :readonly="submitted"
+    <VInput
+      :model-value="response"
       :rules="[requiredRule]"
-      class="my-3"
-      label="Answer"
+      validate-on="submit"
     >
-      <template #prepend>
-        <VAvatar size="small" variant="tonal">{{ index + 1 }}</VAvatar>
-      </template>
-      <template v-if="submitted" #append>
-        <VIcon v-bind="iconProps(index)" />
-      </template>
-    </VTextField>
+      <span v-for="(it, i) in parsedQuestion" :key="i">
+        <template v-if="typeof it === 'number'">
+          <VInput
+            :model-value="response[it]"
+            :rules="[(val: string) => !!val]"
+            class="blank"
+            hide-details
+          >
+            <template #default="{ isValid }">
+              <VField :error="isValid.value === false">
+                <input v-model="response[it]" :readonly="submitted" />
+              </VField>
+            </template>
+            <template v-if="submitted" #append>
+              <VIcon v-bind="iconProps(it)" size="small" />
+            </template>
+          </VInput>
+        </template>
+        <template v-else>{{ it }}</template>
+      </span>
+    </VInput>
     <VAlert
       v-if="submitted"
       :text="userState?.isCorrect ? 'Correct' : 'Incorrect'"
@@ -38,9 +48,13 @@ import cloneDeep from 'lodash/cloneDeep';
 import { ElementData } from '@tailor-cms/ce-fill-blank-manifest';
 
 const BLANK = /(@blank)/g;
-const initializeResponse = () =>
-  cloneDeep(props.userState?.response) ??
-  Array(props.data.question.match(BLANK)?.length ?? 0).fill('');
+const initializeResponse = () => {
+  const blankCount = props.data.question.match(BLANK)?.length ?? 0;
+  const userResponse = cloneDeep(props.userState?.response);
+  return Array(blankCount)
+    .fill('')
+    .map((it, i) => userResponse?.[i] ?? it);
+};
 
 const props = defineProps<{ id: number; data: ElementData; userState: any }>();
 const emit = defineEmits(['interaction']);
@@ -50,8 +64,10 @@ const submitted = ref('isSubmitted' in (props.userState ?? {}));
 const response = ref<string[]>(initializeResponse());
 
 const parsedQuestion = computed(() => {
-  let count = 0;
-  return props.data.question.replace(BLANK, () => `${++count}______`);
+  let index = 0;
+  return props.data.question
+    .split(/(@blank)/g)
+    .map((it) => (it === '@blank' ? index++ : it));
 });
 
 const submit = async () => {
@@ -59,16 +75,16 @@ const submit = async () => {
   if (valid) emit('interaction', { response: response.value });
 };
 
-const requiredRule = (val: string | boolean | number) => {
-  return !!val || 'You have to enter your answer.';
+const requiredRule = (val: string[]) => {
+  return val.every(Boolean) || 'You must enter all the answers.';
 };
 
 const iconProps = (index: number) => {
-  const response = props.userState.response?.[index].toLowerCase();
-  const correct = props.userState.correct?.[index].map((it: string) =>
+  const response = props.userState.response?.[index]?.toLowerCase();
+  const correct = props.userState.correct?.[index]?.map((it: string) =>
     it.toLowerCase(),
   );
-  const isCorrect = correct.includes(response);
+  const isCorrect = correct?.includes(response);
   if (isCorrect) return { icon: 'mdi-check-circle', color: 'success' };
   return { icon: 'mdi-close-circle', color: 'error' };
 };
@@ -91,9 +107,26 @@ watch(
 );
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .tce-root {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 1rem;
+}
+
+:deep(.v-input__control) {
+  display: block;
+}
+
+.blank {
+  display: inline-flex;
+  vertical-align: bottom;
+
+  :deep(.v-input__append) {
+    margin-inline-start: 0.25rem !important;
+  }
+
+  input {
+    padding: 0 0.25rem;
+  }
 }
 </style>
