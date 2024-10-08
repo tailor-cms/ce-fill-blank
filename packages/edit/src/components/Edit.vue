@@ -153,7 +153,8 @@ watch(
 );
 
 watch(count, (val) => {
-  if (val > elementData.correct.length) elementData.correct.push(['']);
+  const diff = val - elementData.correct.length;
+  if (diff) return elementData.correct.push(...Array(diff).fill(''));
 });
 </script>
 
