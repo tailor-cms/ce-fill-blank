@@ -6,7 +6,7 @@
       :rules="[requiredRule]"
       validate-on="submit"
     >
-      <template v-for="(it, i) in parsedQuestion" :key="i">
+      <span v-for="(it, i) in parsedQuestion" :key="i">
         <template v-if="typeof it === 'number'">
           <VInput
             :model-value="response[it]"
@@ -25,7 +25,7 @@
           </VInput>
         </template>
         <template v-else>{{ it }}</template>
-      </template>
+      </span>
     </VInput>
     <VAlert
       v-if="submitted"
