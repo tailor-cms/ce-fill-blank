@@ -19,69 +19,70 @@
       <template #details>Type '@blank' when new blank is needed. </template>
     </VTextarea>
     <div class="text-subtitle-2 mb-2">Answers</div>
-
-    <VSlideYTransition group>
-      <div v-for="(group, groupIndex) in elementData.correct" :key="groupIndex">
-        <div class="d-flex mb-4">
-          <VChip
-            class="font-weight-bold"
-            color="primary-darken-3"
-            size="small"
-            variant="flat"
-            label
+    <VInput :model-value="elementData.correct" :rules="[rules.isSynced]">
+      <div class="d-flex flex-column w-100">
+        <VSlideYTransition group>
+          <div
+            v-for="(group, groupIndex) in elementData.correct"
+            :key="groupIndex"
           >
-            {{ groupIndex + 1 }}
-          </VChip>
-          <VSpacer />
-          <VBtn
-            v-if="!isDisabled && !isSynced"
-            class="ml-2"
-            color="secondary-darken-1"
-            prepend-icon="mdi-delete"
-            size="small"
-            variant="text"
-            rounded
-            @click="removeGroup(groupIndex)"
-          >
-            Remove answer group
-          </VBtn>
-        </div>
-        <VTextField
-          v-for="(answer, answerIndex) in group"
-          :key="`${groupIndex}.${answerIndex}`"
-          :model-value="answer"
-          :readonly="isDisabled"
-          :rules="[rules.required]"
-          class="my-2"
-          placeholder="Answer..."
-          @update:model-value="updateAnswer(groupIndex, answerIndex, $event)"
-        >
-          <template v-if="!isDisabled && group.length > 1" #append>
-            <VBtn
-              aria-label="Remove answer"
-              density="comfortable"
-              icon="mdi-close"
-              variant="text"
-              @click="removeAnswer(groupIndex, answerIndex)"
-            />
-          </template>
-        </VTextField>
-        <div v-if="!isDisabled" class="mb-4 d-flex justify-end">
-          <VBtn
-            prepend-icon="mdi-plus"
-            variant="text"
-            rounded
-            @click="addAnswer(groupIndex)"
-          >
-            Add Answer
-          </VBtn>
-        </div>
+            <div class="d-flex mb-4">
+              <VChip
+                class="font-weight-bold"
+                color="primary-darken-3"
+                size="small"
+                variant="flat"
+                label
+              >
+                {{ groupIndex + 1 }}
+              </VChip>
+              <VSpacer />
+              <VBtn
+                v-if="!isDisabled && !isSynced"
+                class="ml-2"
+                color="secondary-darken-1"
+                prepend-icon="mdi-delete"
+                size="small"
+                variant="text"
+                rounded
+                @click="removeGroup(groupIndex)"
+              >
+                Remove answer group
+              </VBtn>
+            </div>
+            <VTextField
+              v-for="(_, answerIndex) in group"
+              :key="`${groupIndex}.${answerIndex}`"
+              v-model="elementData.correct[groupIndex][answerIndex]"
+              :readonly="isDisabled"
+              :rules="[rules.required]"
+              class="my-2"
+              placeholder="Answer..."
+            >
+              <template v-if="!isDisabled && group.length > 1" #append>
+                <VBtn
+                  aria-label="Remove answer"
+                  density="comfortable"
+                  icon="mdi-close"
+                  variant="text"
+                  @click="removeAnswer(groupIndex, answerIndex)"
+                />
+              </template>
+            </VTextField>
+            <div v-if="!isDisabled" class="mb-4 d-flex justify-end">
+              <VBtn
+                prepend-icon="mdi-plus"
+                variant="text"
+                rounded
+                @click="addAnswer(groupIndex)"
+              >
+                Add Answer
+              </VBtn>
+            </div>
+          </div>
+        </VSlideYTransition>
       </div>
-    </VSlideYTransition>
-    <VAlert v-if="!isSynced" border="start" type="error" variant="tonal">
-      Question and blanks are out of sync!<br />
-      Please delete unnecessary answer groups or add blanks in the question!
-    </VAlert>
+    </VInput>
     <div v-if="!isDisabled" class="d-flex justify-end mt-8">
       <VBtn :disabled="isDirty" variant="text" @click="cancel">Cancel</VBtn>
       <VBtn :disabled="isDirty" class="ml-2" type="submit" variant="tonal">
@@ -100,8 +101,14 @@ import pullAt from 'lodash/pullAt';
 import size from 'lodash/size';
 
 const BLANK = /(@blank)/g;
+const SYNC_ERROR = `
+  Question and blanks are out of sync! Please delete unnecessary answer groups
+  or add blanks in the question!
+`;
+
 const rules = {
   required: (val: string) => !!val || 'The field is required',
+  isSynced: (val: string[][]) => val.length === count.value || SYNC_ERROR,
   hasBlanks: (val: string) =>
     !!val.match(BLANK) || 'At least one @blank required.',
 };
@@ -122,10 +129,6 @@ const isSynced = computed(() => count.value === elementData.correct.length);
 
 const addAnswer = (index: number) => {
   elementData.correct[index].push('');
-};
-
-const updateAnswer = (groupIndex: number, answerIndex: number, val: string) => {
-  elementData.correct[groupIndex][answerIndex] = val;
 };
 
 const removeAnswer = (groupIndex: number, answerIndex: number) => {
