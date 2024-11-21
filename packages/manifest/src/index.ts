@@ -15,6 +15,7 @@ export const name = 'Fill in the blank';
 export const initState: DataInitializer = (): ElementData => ({
   question: '',
   correct: [],
+  hint: '',
 });
 
 // Can be loaded from package.json

@@ -1,7 +1,8 @@
 // Example counter component
 export interface ElementData {
   question: string;
-  correct: string[][];
+  correct?: string[][];
+  hint: string;
 }
 
 export interface Element {

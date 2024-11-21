@@ -1,5 +1,7 @@
 {
   "name": "@tailor-cms/ce-fill-blank-display",
+  "description": "Tailor CMS Fill in the blank end-user component",
+  "author": "Studion <info@gostudion.com> (https://github.com/tailor-cms)",
   "type": "module",
   "version": "0.0.4",
   "exports": {
@@ -33,8 +35,6 @@
   "dependencies": {
     "lodash": "^4.17.21"
   },
-  "description": "Tailor CMS Fill in the blank element",
-  "author": "Studion <info@gostudion.com> (https://github.com/tailor-cms)",
   "publishConfig": {
     "access": "public"
   }
