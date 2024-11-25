@@ -5,21 +5,27 @@
     validate-on="submit"
     @submit.prevent="save"
   >
-    <VTextarea
-      ref="question"
+    <div class="text-subtitle-2 mb-2">Question</div>
+    <RichTextEditor
       v-model="elementData.question"
       :readonly="isDisabled"
       :rules="[rules.required, rules.hasBlanks]"
-      class="my-3"
       details="Type '@blank' when new blank is needed."
-      label="Question"
-      rows="3"
-      auto-grow
+      class="my-3"
+      variant="outlined"
+    />
+    <div class="d-flex text-subtitle-2 justify-space-between mb-2">
+      <span v-if="isGraded">Answers</span>
+      <span v-else-if="!isDisabled">
+        {{ count }} {{ pluralize('blank', count) }} detected.
+      </span>
+      <span v-if="!isDisabled">Type '@blank' when new blank is needed.</span>
+    </div>
+    <VInput
+      v-if="elementData.correct?.length"
+      :model-value="elementData.correct"
+      :rules="[rules.isSynced]"
     >
-      <template #details>Type '@blank' when new blank is needed. </template>
-    </VTextarea>
-    <div class="text-subtitle-2 mb-2">Answers</div>
-    <VInput :model-value="elementData.correct" :rules="[rules.isSynced]">
       <div class="d-flex flex-column w-100">
         <Draggable
           v-model="elementData.correct"
@@ -69,6 +75,7 @@
                   :rules="[rules.required]"
                   class="my-2"
                   placeholder="Answer..."
+                  variant="outlined"
                 >
                   <template v-if="!isDisabled && group.length > 1" #append>
                     <VBtn
@@ -96,9 +103,30 @@
         </Draggable>
       </div>
     </VInput>
-    <div v-if="!isDisabled" class="d-flex justify-end mt-8">
-      <VBtn :disabled="isDirty" variant="text" @click="cancel">Cancel</VBtn>
-      <VBtn :disabled="isDirty" class="ml-2" type="submit" variant="tonal">
+    <div class="text-subtitle-2 mb-2">Hint</div>
+    <VTextField
+      v-model="elementData.hint"
+      :clearable="!isDisabled"
+      :readonly="isDisabled"
+      placeholder="Optional hint..."
+      variant="outlined"
+    />
+    <div v-if="!isDisabled" class="d-flex justify-end">
+      <VBtn
+        :disabled="isDirty"
+        color="primary-darken-4"
+        variant="text"
+        @click="cancel"
+      >
+        Cancel
+      </VBtn>
+      <VBtn
+        :disabled="isDirty"
+        class="ml-2"
+        color="primary-darken-3"
+        type="submit"
+        variant="tonal"
+      >
         Save
       </VBtn>
     </div>
@@ -112,7 +140,9 @@ import cloneDeep from 'lodash/cloneDeep';
 import Draggable from 'vuedraggable/src/vuedraggable';
 import isEqual from 'lodash/isEqual';
 import pullAt from 'lodash/pullAt';
+import { RichTextEditor } from '@tailor-cms/core-components';
 import size from 'lodash/size';
+import pluralize from 'pluralize';
 
 const BLANK = /(@blank)/g;
 const SYNC_ERROR = `
@@ -130,6 +160,7 @@ const rules = {
 const emit = defineEmits(['save']);
 const props = defineProps<{
   element: Element;
+  isGraded: boolean;
   isFocused: boolean;
   isDisabled: boolean;
 }>();
@@ -139,17 +170,22 @@ const elementData = reactive<ElementData>(cloneDeep(props.element.data));
 const isDirty = computed(() => isEqual(elementData, props.element.data));
 
 const count = computed(() => size(elementData.question.match(BLANK)));
-const isSynced = computed(() => count.value === elementData.correct.length);
+const isSynced = computed(() => !elementData.correct || count.value === elementData.correct.length);
 
 const addAnswer = (index: number) => {
+  if (!elementData.correct) return;
   elementData.correct[index].push('');
 };
 
 const removeAnswer = (groupIndex: number, answerIndex: number) => {
+  if (!elementData.correct) return;
   pullAt(elementData.correct[groupIndex], answerIndex);
 };
 
-const removeGroup = (index: number) => pullAt(elementData.correct, index);
+const removeGroup = (index: number) => {
+  if (!elementData.correct) return;
+  pullAt(elementData.correct, index);
+}
 
 const save = async () => {
   const { valid } = await form.value?.validate();
@@ -166,7 +202,18 @@ watch(
   (data) => Object.assign(elementData, cloneDeep(data)),
 );
 
+watch(
+  () => props.isGraded,
+  (val) => {
+    if (!val) delete elementData.correct;
+    else elementData.correct = Array(count.value).fill(['']);
+    emit('save', elementData);
+  },
+  { immediate: true },
+);
+
 watch(count, (val) => {
+  if (!props.isGraded || !elementData.correct) return;
   const diff = val - elementData.correct.length;
   if (diff > 0) return elementData.correct.push(...Array(diff).fill(['']));
 });

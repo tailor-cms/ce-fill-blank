@@ -1,6 +1,30 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
   <VForm ref="form" class="tce-root" @submit.prevent="submit">
+    <div v-if="data.hint" class="d-flex justify-end mb-4">
+      <VTooltip
+        v-model="showHint"
+        :open-on-hover="false"
+        location="bottom"
+        max-width="350"
+        close-on-back
+        open-on-click
+      >
+        <template #activator="{ isActive, props: tooltipProps }">
+          <VBtn
+            v-click-outside="() => (showHint = false)"
+            v-bind="tooltipProps"
+            :active="isActive"
+            :prepend-icon="`mdi-lightbulb-${isActive ? 'on' : 'outline'}`"
+            size="small"
+            text="Hint"
+            variant="text"
+            rounded
+          />
+        </template>
+        {{ data.hint }}
+      </VTooltip>
+    </div>
     <VInput
       :model-value="response"
       :rules="[requiredRule]"
@@ -60,6 +84,7 @@ const props = defineProps<{ id: number; data: ElementData; userState: any }>();
 const emit = defineEmits(['interaction']);
 
 const form = ref<HTMLFormElement>();
+const showHint = ref(false);
 const submitted = ref('isSubmitted' in (props.userState ?? {}));
 const response = ref<string[]>(initializeResponse());
 

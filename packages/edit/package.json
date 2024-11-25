@@ -27,6 +27,7 @@
     "@tailor-cms/ce-fill-blank-manifest": "workspace:*",
     "@tailor-cms/eslint-config": "0.0.2",
     "@types/lodash": "^4.17.6",
+    "@types/pluralize": "^0.0.33",
     "@vitejs/plugin-vue": "^4.2.3",
     "typescript": "^5.1.6",
     "vite": "^4.4.5",
@@ -35,6 +36,7 @@
   "dependencies": {
     "@tailor-cms/core-components": "^1.0.14",
     "lodash": "^4.17.21",
+    "pluralize": "^8.0.0",
     "vuedraggable": "^4.1.0"
   },
   "publishConfig": {

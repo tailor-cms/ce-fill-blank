@@ -38,6 +38,7 @@ const manifest: ElementManifest = {
   version: '1.0',
   name,
   ssr: false,
+  isQuestion: true,
   initState,
   ui,
   mocks,
