@@ -114,7 +114,6 @@ import isEqual from 'lodash/isEqual';
 import pluralize from 'pluralize';
 import pullAt from 'lodash/pullAt';
 import { QuestionContainer } from '@tailor-cms/core-components';
-import size from 'lodash/size';
 
 const BLANK = /(@blank)/g;
 const SYNC_ERROR = `
@@ -124,7 +123,7 @@ const SYNC_ERROR = `
 
 const rules = {
   required: (val: string) => !!val || 'The field is required',
-  isSynced: (val: string[][]) => val.length === count.value || SYNC_ERROR,
+  isSynced: (val: string[][]) => val.length === blankCount.value || SYNC_ERROR,
   hasBlanks: (val: string) =>
     !!val.match(BLANK) || 'At least one @blank required.',
 };
