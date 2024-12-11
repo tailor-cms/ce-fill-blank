@@ -57,6 +57,7 @@ export function onUserInteraction(
   // Simulate user state update within CEK
   if (IS_CEK) {
     // Can be reset to initial / mocked state via UI
+    context.response = payload.response;
     if (isGradeable) context.isCorrect = isCorrect;
     context.isSubmitted = true;
   }
