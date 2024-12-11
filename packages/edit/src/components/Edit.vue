@@ -1,23 +1,21 @@
 <template>
-  <VForm
-    ref="form"
-    class="tce-container"
-    validate-on="submit"
-    @submit.prevent="save"
+  <QuestionContainer
+    v-bind="{
+      allowedEmbedTypes,
+      elementData,
+      isDirty,
+      isDisabled,
+      isGradeable,
+    }"
+    :show-feedback="false"
+    @cancel="updateData(element.data)"
+    @save="save"
+    @update="updateData($event)"
   >
-    <div class="text-subtitle-2 mb-2">Question</div>
-    <RichTextEditor
-      v-model="elementData.question"
-      :readonly="isDisabled"
-      :rules="[rules.required, rules.hasBlanks]"
-      details="Type '@blank' when new blank is needed."
-      class="my-3"
-      variant="outlined"
-    />
     <div class="d-flex text-subtitle-2 justify-space-between mb-2">
-      <span v-if="isGraded">Answers</span>
+      <span v-if="isGradeable">Answers</span>
       <span v-else-if="!isDisabled">
-        {{ count }} {{ pluralize('blank', count) }} detected.
+        {{ blankCount }} {{ pluralize('blank', blankCount) }} detected.
       </span>
       <span v-if="!isDisabled">Type '@blank' when new blank is needed.</span>
     </div>
@@ -25,124 +23,98 @@
       v-if="elementData.correct?.length"
       :model-value="elementData.correct"
       :rules="[rules.isSynced]"
+      class="mb-4"
     >
-      <div class="d-flex flex-column w-100">
-        <Draggable
-          v-model="elementData.correct"
-          :disabled="isDisabled"
-          animation="150"
-          handle=".drag-handle"
-          item-key="id"
-        >
-          <template #item="{ element: group, index: groupIndex }">
-            <div>
-              <div class="d-flex mb-4">
-                <VIcon
-                  v-if="!isDisabled"
-                  class="drag-handle"
-                  color="grey"
-                  icon="mdi-drag-vertical"
-                />
-                <VChip
-                  class="font-weight-bold"
-                  color="primary-darken-3"
-                  size="small"
-                  variant="flat"
-                  label
-                >
-                  {{ groupIndex + 1 }}
-                </VChip>
-                <VSpacer />
-                <VBtn
-                  v-if="!isDisabled && !isSynced"
-                  class="ml-2"
-                  color="secondary-darken-1"
-                  prepend-icon="mdi-delete"
-                  size="small"
-                  variant="text"
-                  rounded
-                  @click="removeGroup(groupIndex)"
-                >
-                  Remove answer group
-                </VBtn>
-              </div>
-              <VSlideYTransition group>
-                <VTextField
-                  v-for="(_, answerIndex) in group"
-                  :key="`${groupIndex}.${answerIndex}`"
-                  v-model="elementData.correct[groupIndex][answerIndex]"
-                  :readonly="isDisabled"
-                  :rules="[rules.required]"
-                  class="my-2"
-                  placeholder="Answer..."
-                  variant="outlined"
-                >
-                  <template v-if="!isDisabled && group.length > 1" #append>
-                    <VBtn
-                      aria-label="Remove answer"
-                      density="comfortable"
-                      icon="mdi-close"
-                      variant="text"
-                      @click="removeAnswer(groupIndex, answerIndex)"
-                    />
-                  </template>
-                </VTextField>
-              </VSlideYTransition>
-              <div v-if="!isDisabled" class="mb-4 d-flex justify-end">
-                <VBtn
-                  prepend-icon="mdi-plus"
-                  variant="text"
-                  rounded
-                  @click="addAnswer(groupIndex)"
-                >
-                  Add Answer
-                </VBtn>
-              </div>
+      <Draggable
+        v-model="elementData.correct"
+        :component-data="{ class: 'd-flex flex-column w-100 ga-4' }"
+        :disabled="isDisabled"
+        animation="150"
+        handle=".drag-handle"
+        item-key="id"
+      >
+        <template #item="{ element: group, index: groupIndex }">
+          <div>
+            <div class="d-flex mb-4">
+              <VIcon
+                v-if="!isDisabled"
+                class="drag-handle"
+                color="grey"
+                icon="mdi-drag-vertical"
+              />
+              <VChip
+                class="font-weight-bold"
+                color="primary-darken-3"
+                size="small"
+                variant="flat"
+                label
+              >
+                {{ groupIndex + 1 }}
+              </VChip>
+              <VSpacer />
+              <VBtn
+                v-if="!isDisabled && !isSynced"
+                color="secondary-lighten-1"
+                size="x-small"
+                variant="tonal"
+                icon
+                @click="removeGroup(groupIndex)"
+              >
+                <VIcon icon="mdi-delete-outline" size="large" />
+              </VBtn>
             </div>
-          </template>
-        </Draggable>
-      </div>
+            <VSlideYTransition group>
+              <VTextField
+                v-for="(_, answerIndex) in group"
+                :key="`${groupIndex}.${answerIndex}`"
+                v-model="elementData.correct[groupIndex][answerIndex]"
+                :readonly="isDisabled"
+                :rules="[rules.required]"
+                class="my-2"
+                placeholder="Answer..."
+                variant="outlined"
+              >
+                <template v-if="!isDisabled && group.length > 1" #append>
+                  <VBtn
+                    aria-label="Remove answer"
+                    color="primary-darken-4"
+                    size="x-small"
+                    variant="text"
+                    icon
+                    @click="removeAnswer(groupIndex, answerIndex)"
+                  >
+                    <VIcon icon="mdi-close" size="large" />
+                  </VBtn>
+                </template>
+              </VTextField>
+            </VSlideYTransition>
+            <div v-if="!isDisabled" class="d-flex justify-end">
+              <VBtn
+                color="primary-darken-4"
+                prepend-icon="mdi-plus"
+                variant="text"
+                @click="addAnswer(groupIndex)"
+              >
+                Add Answer
+              </VBtn>
+            </div>
+          </div>
+        </template>
+      </Draggable>
     </VInput>
-    <div class="text-subtitle-2 mb-2">Hint</div>
-    <VTextField
-      v-model="elementData.hint"
-      :clearable="!isDisabled"
-      :readonly="isDisabled"
-      placeholder="Optional hint..."
-      variant="outlined"
-    />
-    <div v-if="!isDisabled" class="d-flex justify-end">
-      <VBtn
-        :disabled="isDirty"
-        color="primary-darken-4"
-        variant="text"
-        @click="cancel"
-      >
-        Cancel
-      </VBtn>
-      <VBtn
-        :disabled="isDirty"
-        class="ml-2"
-        color="primary-darken-3"
-        type="submit"
-        variant="tonal"
-      >
-        Save
-      </VBtn>
-    </div>
-  </VForm>
+  </QuestionContainer>
 </template>
 
 <script lang="ts" setup>
-import { computed, defineEmits, defineProps, reactive, ref, watch } from 'vue';
+import { computed, defineEmits, defineProps, reactive, watch } from 'vue';
 import { Element, ElementData } from '@tailor-cms/ce-fill-blank-manifest';
 import cloneDeep from 'lodash/cloneDeep';
 import Draggable from 'vuedraggable/src/vuedraggable';
 import isEqual from 'lodash/isEqual';
-import pullAt from 'lodash/pullAt';
-import { RichTextEditor } from '@tailor-cms/core-components';
-import size from 'lodash/size';
 import pluralize from 'pluralize';
+import pullAt from 'lodash/pullAt';
+import { QuestionContainer } from '@tailor-cms/core-components';
+import size from 'lodash/size';
 
 const BLANK = /(@blank)/g;
 const SYNC_ERROR = `
@@ -159,18 +131,25 @@ const rules = {
 
 const emit = defineEmits(['save']);
 const props = defineProps<{
+  allowedEmbedTypes: string[];
   element: Element;
-  isGraded: boolean;
   isFocused: boolean;
   isDisabled: boolean;
+  isGradeable: boolean;
 }>();
 
-const form = ref<HTMLFormElement>();
 const elementData = reactive<ElementData>(cloneDeep(props.element.data));
-const isDirty = computed(() => isEqual(elementData, props.element.data));
+const isDirty = computed(() => !isEqual(elementData, props.element.data));
 
-const count = computed(() => size(elementData.question.match(BLANK)));
-const isSynced = computed(() => !elementData.correct || count.value === elementData.correct.length);
+const blankCount = computed(() => {
+  const { question, embeds } = elementData;
+  const questionData = question.map((id: any) => embeds[id].data.content);
+  return questionData.toString().match(BLANK)?.length ?? 0;
+});
+
+const isSynced = computed(
+  () => !elementData.correct || blankCount.value === elementData.correct.length,
+);
 
 const addAnswer = (index: number) => {
   if (!elementData.correct) return;
@@ -185,35 +164,18 @@ const removeAnswer = (groupIndex: number, answerIndex: number) => {
 const removeGroup = (index: number) => {
   if (!elementData.correct) return;
   pullAt(elementData.correct, index);
-}
-
-const save = async () => {
-  const { valid } = await form.value?.validate();
-  if (valid) emit('save', elementData);
 };
 
-const cancel = () => {
-  Object.assign(elementData, cloneDeep(props.element.data));
-  form.value?.resetValidation();
+const save = () => emit('save', elementData);
+
+const updateData = (data: ElementData) => {
+  Object.assign(elementData, cloneDeep(data));
 };
 
-watch(
-  () => props.element.data,
-  (data) => Object.assign(elementData, cloneDeep(data)),
-);
+watch(() => props.element.data, updateData);
 
-watch(
-  () => props.isGraded,
-  (val) => {
-    if (!val) delete elementData.correct;
-    else elementData.correct = Array(count.value).fill(['']);
-    emit('save', elementData);
-  },
-  { immediate: true },
-);
-
-watch(count, (val) => {
-  if (!props.isGraded || !elementData.correct) return;
+watch(blankCount, (val) => {
+  if (!props.isGradeable || !elementData.correct) return;
   const diff = val - elementData.correct.length;
   if (diff > 0) return elementData.correct.push(...Array(diff).fill(['']));
 });
