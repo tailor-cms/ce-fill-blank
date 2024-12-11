@@ -1,5 +1,11 @@
 # @tailor-cms/ce-fill-blank-display
 
+## 0.0.5
+
+### Patch Changes
+
+- - Refactored Edit and Display components to use QuestionContainer component from core-components/lx-components.
+
 ## 0.0.4
 
 ### Patch Changes
