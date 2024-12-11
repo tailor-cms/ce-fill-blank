@@ -49,15 +49,16 @@ export function onUserInteraction(
   context: any,
   payload: any,
 ): any {
+  const isGradeable = 'correct' in element.data;
   const isCorrect = every(element.data.correct, (it, i) => {
     const correct = it.map((it: string) => it.toLowerCase());
-    console.log('correct', correct, payload.response[i].toLowerCase());
     return correct.includes(payload.response[i].toLowerCase());
   });
   // Simulate user state update within CEK
   if (IS_CEK) {
     // Can be reset to initial / mocked state via UI
-    Object.assign(context, { response: payload.response, isCorrect });
+    if (isGradeable) context.isCorrect = isCorrect;
+    context.isSubmitted = true;
   }
   // Can have arbitrary return value (interpreted by target system)
   // FE is updated if updateDisplayState is true
