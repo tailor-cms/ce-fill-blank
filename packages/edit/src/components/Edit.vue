@@ -1,11 +1,12 @@
 <template>
   <QuestionContainer
     v-bind="{
-      allowedEmbedTypes,
+      type: manifest.name,
+      icon: manifest.ui.icon,
+      embedTypes,
       elementData,
       isDirty,
       isDisabled,
-      isGradeable,
     }"
     :show-feedback="false"
     @cancel="updateData(element.data)"
@@ -13,7 +14,7 @@
     @update="updateData($event)"
   >
     <div class="d-flex text-subtitle-2 justify-space-between mb-2">
-      <span v-if="isGradeable">Answers</span>
+      <span v-if="isGradable">Answers</span>
       <span v-else-if="!isDisabled">
         {{ blankCount }} {{ pluralize('blank', blankCount) }} detected.
       </span>
@@ -107,7 +108,10 @@
 
 <script lang="ts" setup>
 import { computed, defineEmits, defineProps, reactive, watch } from 'vue';
-import { Element, ElementData } from '@tailor-cms/ce-fill-blank-manifest';
+import manifest, {
+  Element,
+  ElementData,
+} from '@tailor-cms/ce-fill-blank-manifest';
 import cloneDeep from 'lodash/cloneDeep';
 import Draggable from 'vuedraggable/src/vuedraggable';
 import isEqual from 'lodash/isEqual';
@@ -130,13 +134,13 @@ const rules = {
 
 const emit = defineEmits(['save']);
 const props = defineProps<{
-  allowedEmbedTypes: string[];
+  embedTypes: any[];
   element: Element;
   isFocused: boolean;
   isDisabled: boolean;
-  isGradeable: boolean;
 }>();
 
+const isGradable = computed(() => props.element.data.isGradable);
 const elementData = reactive<ElementData>(cloneDeep(props.element.data));
 const isDirty = computed(() => !isEqual(elementData, props.element.data));
 
@@ -174,7 +178,7 @@ const updateData = (data: ElementData) => {
 watch(() => props.element.data, updateData);
 
 watch(blankCount, (val) => {
-  if (!props.isGradeable || !elementData.correct) return;
+  if (!isGradable.value || !elementData.correct) return;
   const diff = val - elementData.correct.length;
   if (diff > 0) return elementData.correct.push(...Array(diff).fill(['']));
 });
