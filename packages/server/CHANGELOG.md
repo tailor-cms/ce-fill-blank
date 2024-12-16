@@ -1,5 +1,11 @@
 # @tailor-cms/ce-fill-blank-server
 
+## 0.0.6
+
+### Patch Changes
+
+- Refactored isGradable handling, by storing it directly in element data.
+
 ## 0.0.5
 
 ### Patch Changes
