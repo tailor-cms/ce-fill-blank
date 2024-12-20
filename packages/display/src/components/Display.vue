@@ -1,99 +1,76 @@
-<!-- eslint-disable vue/no-v-html -->
 <template>
-  <VForm ref="form" class="tce-root" @submit.prevent="submit">
-    <VInput
-      :model-value="response"
-      :rules="[requiredRule]"
-      validate-on="submit"
-    >
-      <span v-for="(it, i) in parsedQuestion" :key="i">
-        <template v-if="typeof it === 'number'">
-          <VInput
-            :model-value="response[it]"
-            :rules="[(val: string) => !!val]"
-            class="blank"
-            hide-details
-          >
-            <template #default="{ isValid }">
-              <VField :error="isValid.value === false">
-                <input v-model="response[it]" :readonly="submitted" />
-              </VField>
-            </template>
-            <template v-if="submitted" #append>
-              <VIcon v-bind="iconProps(it)" size="small" />
-            </template>
-          </VInput>
+  <QuestionContainer
+    :data="data"
+    :is-correct="userState.isCorrect"
+    :is-graded="isGraded"
+    :is-submitted="isSubmitted"
+    allowed-retake
+    @retry="isSubmitted = false"
+    @submit="submit"
+  >
+    <div class="text-subtitle-2 mb-4">Enter your answer(s):</div>
+    <div class="d-flex flex-column ga-2">
+      <VTextField
+        v-for="index in blankCount"
+        :key="index"
+        v-model="response[index - 1]"
+        :label="`@blank #${index}`"
+        :readonly="isSubmitted"
+        :rules="[(val: string) => !!val || 'Answer is required']"
+        placeholder="Answer..."
+        variant="outlined"
+      >
+        <template v-if="isSubmitted && isGraded" #append>
+          <VIcon
+            :color="isCorrect(index - 1) ? 'success' : 'error'"
+            :icon="`mdi-${isCorrect(index - 1) ? 'check' : 'close'}-circle`"
+          />
         </template>
-        <template v-else>{{ it }}</template>
-      </span>
-    </VInput>
-    <VAlert
-      v-if="submitted"
-      :text="userState?.isCorrect ? 'Correct' : 'Incorrect'"
-      :type="userState?.isCorrect ? 'success' : 'error'"
-      class="mb-3"
-      rounded="lg"
-      variant="tonal"
-    />
-    <div class="d-flex justify-end">
-      <VBtn v-if="!submitted" type="submit" variant="tonal">Submit</VBtn>
-      <VBtn v-else variant="tonal" @click="submitted = false">Try Again</VBtn>
+      </VTextField>
     </div>
-  </VForm>
+  </QuestionContainer>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import cloneDeep from 'lodash/cloneDeep';
 import { ElementData } from '@tailor-cms/ce-fill-blank-manifest';
+import { QuestionContainer } from '@tailor-cms/lx-components';
+import times from 'lodash/times';
 
 const BLANK = /(@blank)/g;
-const initializeResponse = () => {
-  const blankCount = props.data.question.match(BLANK)?.length ?? 0;
-  const userResponse = cloneDeep(props.userState?.response);
-  return Array(blankCount)
-    .fill('')
-    .map((it, i) => userResponse?.[i] ?? it);
-};
 
 const props = defineProps<{ id: number; data: ElementData; userState: any }>();
 const emit = defineEmits(['interaction']);
 
-const form = ref<HTMLFormElement>();
-const submitted = ref('isSubmitted' in (props.userState ?? {}));
-const response = ref<string[]>(initializeResponse());
-
-const parsedQuestion = computed(() => {
-  let index = 0;
-  return props.data.question
-    .split(/(@blank)/g)
-    .map((it) => (it === '@blank' ? index++ : it));
+const blankCount = computed(() => {
+  const { question, embeds } = props.data;
+  const questionData = question.map((id: any) => embeds[id].data.content);
+  return questionData.toString().match(BLANK)?.length ?? 0;
 });
 
-const submit = async () => {
-  const { valid } = await form.value?.validate();
-  if (valid) emit('interaction', { response: response.value });
-};
+const initializeResponse = () =>
+  times(blankCount.value, (index) => props.userState.response?.[index] ?? '');
 
-const requiredRule = (val: string[]) => {
-  return val.every(Boolean) || 'You must enter all the answers.';
-};
+const isSubmitted = ref(!!props.userState.isSubmitted);
+const response = ref<string[]>(initializeResponse());
 
-const iconProps = (index: number) => {
+const isGraded = computed(() => 'isCorrect' in props.userState);
+
+const submit = () => emit('interaction', { response: response.value });
+
+const isCorrect = (index: number) => {
   const response = props.userState.response?.[index]?.toLowerCase();
   const correct = props.userState.correct?.[index]?.map((it: string) =>
     it.toLowerCase(),
   );
-  const isCorrect = correct?.includes(response);
-  if (isCorrect) return { icon: 'mdi-check-circle', color: 'success' };
-  return { icon: 'mdi-close-circle', color: 'error' };
+  return correct?.includes(response);
 };
 
 watch(
   () => props.userState,
   (state = {}) => {
     response.value = initializeResponse();
-    submitted.value = 'isCorrect' in state;
+    isSubmitted.value = !!state.isSubmitted;
   },
   { deep: true },
 );
