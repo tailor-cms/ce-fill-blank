@@ -1,17 +1,8 @@
 <template>
   <QuestionContainer
-    v-bind="{
-      type: manifest.name,
-      icon: manifest.ui.icon,
-      elementData,
-      embedElementConfig,
-      isDirty,
-      isDisabled,
-    }"
+    v-bind="{ elementData, embedElementConfig, isDisabled }"
     :show-feedback="false"
-    @cancel="updateData(element.data)"
-    @save="save"
-    @update="updateData($event)"
+    @update="emit('update', $event)"
   >
     <div class="d-flex text-subtitle-2 justify-space-between mb-2">
       <span v-if="isGradable">Answers</span>
@@ -27,12 +18,13 @@
       class="mb-4"
     >
       <Draggable
-        v-model="elementData.correct"
         :component-data="{ class: 'd-flex flex-column w-100 ga-4' }"
         :disabled="isDisabled"
+        :model-value="elementData.correct"
         animation="150"
         handle=".drag-handle"
         item-key="id"
+        @update:model-value="emit('update', { correct: $event })"
       >
         <template #item="{ element: group, index: groupIndex }">
           <div>
@@ -66,14 +58,15 @@
             </div>
             <VSlideYTransition group>
               <VTextField
-                v-for="(_, answerIndex) in group"
-                :key="`${groupIndex}.${answerIndex}`"
-                v-model="elementData.correct[groupIndex][answerIndex]"
+                v-for="(answer, index) in group"
+                :key="`${groupIndex}.${index}`"
+                :model-value="answer"
                 :readonly="isDisabled"
                 :rules="[rules.required]"
                 class="my-2"
                 placeholder="Answer..."
                 variant="outlined"
+                @update:model-value="updateAnswer(groupIndex, index, $event)"
               >
                 <template v-if="!isDisabled && group.length > 1" #append>
                   <VBtn
@@ -82,7 +75,7 @@
                     size="x-small"
                     variant="text"
                     icon
-                    @click="removeAnswer(groupIndex, answerIndex)"
+                    @click="removeAnswer(groupIndex, index)"
                   >
                     <VIcon icon="mdi-close" size="large" />
                   </VBtn>
@@ -107,17 +100,15 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineEmits, defineProps, reactive, watch } from 'vue';
-import manifest, {
-  Element,
-  ElementData,
-} from '@tailor-cms/ce-fill-blank-manifest';
+import { computed, defineEmits, defineProps, watch } from 'vue';
 import cloneDeep from 'lodash/cloneDeep';
 import Draggable from 'vuedraggable/src/vuedraggable';
-import isEqual from 'lodash/isEqual';
+import { Element } from '@tailor-cms/ce-fill-blank-manifest';
+import map from 'lodash/map';
 import pluralize from 'pluralize';
 import pullAt from 'lodash/pullAt';
 import { QuestionContainer } from '@tailor-cms/core-components';
+import sortyBy from 'lodash/sortBy';
 
 const BLANK = /(@blank)/g;
 const SYNC_ERROR = `
@@ -132,55 +123,63 @@ const rules = {
     !!val.match(BLANK) || 'At least one @blank required.',
 };
 
-const emit = defineEmits(['save']);
 const props = defineProps<{
   element: Element;
   embedElementConfig: any[];
   isFocused: boolean;
   isDisabled: boolean;
 }>();
+const emit = defineEmits(['save', 'update']);
 
-const isGradable = computed(() => props.element.data.isGradable);
-const elementData = reactive<ElementData>(cloneDeep(props.element.data));
-const isDirty = computed(() => !isEqual(elementData, props.element.data));
+const elementData = computed(() => props.element.data);
+const isGradable = computed(() => elementData.value.isGradable);
 
 const blankCount = computed(() => {
-  const { question, embeds } = elementData;
-  const questionData = question.map((id: any) => embeds[id].data.content);
+  const sortedEmbeds = sortyBy(elementData.value.embeds, 'position');
+  const questionData = map(sortedEmbeds, 'data.content');
   return questionData.toString().match(BLANK)?.length ?? 0;
 });
 
-const isSynced = computed(
-  () => !elementData.correct || blankCount.value === elementData.correct.length,
-);
+const isSynced = computed(() => {
+  const correct = elementData.value.correct;
+  return !correct || blankCount.value === correct.length;
+});
 
 const addAnswer = (index: number) => {
-  if (!elementData.correct) return;
-  elementData.correct[index].push('');
+  const correct = cloneDeep(elementData.value.correct);
+  if (!correct) return;
+  correct[index].push('');
+  emit('update', { correct });
+};
+
+const updateAnswer = (groupIndex: number, answerIndex: number, val: string) => {
+  const correct = cloneDeep(elementData.value.correct);
+  if (!correct) return;
+  correct[groupIndex][answerIndex] = val;
+  emit('update', { correct });
 };
 
 const removeAnswer = (groupIndex: number, answerIndex: number) => {
-  if (!elementData.correct) return;
-  pullAt(elementData.correct[groupIndex], answerIndex);
+  const correct = cloneDeep(elementData.value.correct);
+  if (!correct) return;
+  pullAt(correct[groupIndex], answerIndex);
+  emit('update', { correct });
 };
 
 const removeGroup = (index: number) => {
-  if (!elementData.correct) return;
-  pullAt(elementData.correct, index);
+  const correct = cloneDeep(elementData.value.correct);
+  if (!correct) return;
+  pullAt(correct, index);
+  emit('update', { correct });
 };
-
-const save = () => emit('save', elementData);
-
-const updateData = (data: ElementData) => {
-  Object.assign(elementData, cloneDeep(data));
-};
-
-watch(() => props.element.data, updateData);
 
 watch(blankCount, (val) => {
-  if (!isGradable.value || !elementData.correct) return;
-  const diff = val - elementData.correct.length;
-  if (diff > 0) return elementData.correct.push(...Array(diff).fill(['']));
+  if (!isGradable.value || !elementData.value.correct) return;
+  const diff = val - elementData.value.correct.length;
+  if (diff <= 0) return;
+  const correct = cloneDeep(elementData.value.correct);
+  correct.push(...Array(diff).fill(['']));
+  emit('update', { correct });
 });
 </script>
 
