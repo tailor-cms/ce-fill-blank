@@ -14,7 +14,6 @@ export const name = 'Fill in the blank';
 // entity)
 export const initState: DataInitializer = (): ElementData => ({
   embeds: {},
-  question: [],
   correct: [],
   hint: '',
 });

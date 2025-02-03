@@ -34,7 +34,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { ElementData } from '@tailor-cms/ce-fill-blank-manifest';
+import map from 'lodash/map';
 import { QuestionContainer } from '@tailor-cms/lx-components';
+import sortyBy from 'lodash/sortBy';
 import times from 'lodash/times';
 
 const BLANK = /(@blank)/g;
@@ -43,8 +45,8 @@ const props = defineProps<{ id: number; data: ElementData; userState: any }>();
 const emit = defineEmits(['interaction']);
 
 const blankCount = computed(() => {
-  const { question, embeds } = props.data;
-  const questionData = question.map((id: any) => embeds[id].data.content);
+  const sortedEmbeds = sortyBy(props.data.embeds, 'position');
+  const questionData = map(sortedEmbeds, 'data.content');
   return questionData.toString().match(BLANK)?.length ?? 0;
 });
 
