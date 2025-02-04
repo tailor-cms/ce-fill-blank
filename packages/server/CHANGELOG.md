@@ -1,5 +1,11 @@
 # @tailor-cms/ce-fill-blank-server
 
+## 0.0.10
+
+### Patch Changes
+
+- Bumped core-components package.
+
 ## 0.0.9
 
 ### Patch Changes
