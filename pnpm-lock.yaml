@@ -39,8 +39,8 @@ importers:
   packages/display:
     dependencies:
       '@tailor-cms/lx-components':
-        specifier: ^0.0.3
-        version: 0.0.3(@types/lodash@4.17.10)(lodash@4.17.21)(vue@3.3.4)(vuetify@3.7.3)
+        specifier: ^0.0.4
+        version: 0.0.4(@types/lodash@4.17.10)(lodash@4.17.21)(vue@3.3.4)(vuetify@3.7.3)
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -73,8 +73,8 @@ importers:
   packages/edit:
     dependencies:
       '@tailor-cms/core-components':
-        specifier: ^1.0.30
-        version: 1.0.30(@tailor-cms/utils@1.0.1)(@tiptap/core@2.10.3(@tiptap/pm@2.10.3))(@tiptap/pm@2.10.3)(@tiptap/starter-kit@2.10.3)(@tiptap/vue-3@2.10.3(@tiptap/core@2.10.3(@tiptap/pm@2.10.3))(@tiptap/pm@2.10.3)(vue@3.3.4))(@types/lodash@4.17.10)(@types/pluralize@0.0.33)(date-fns@3.3.1)(lodash@4.17.21)(p-min-delay@4.0.2)(pluralize@8.0.0)(typescript@5.3.3)(vee-validate@4.14.7(vue@3.3.4))(vue@3.3.4)(vuedraggable@4.1.0(vue@3.3.4))(vuetify@3.7.3)(yup@1.3.3)
+        specifier: ^1.0.32
+        version: 1.0.32(@tailor-cms/utils@1.0.1)(@tiptap/core@2.10.3(@tiptap/pm@2.10.3))(@tiptap/pm@2.10.3)(@tiptap/starter-kit@2.10.3)(@tiptap/vue-3@2.10.3(@tiptap/core@2.10.3(@tiptap/pm@2.10.3))(@tiptap/pm@2.10.3)(vue@3.3.4))(@types/lodash@4.17.10)(@types/pluralize@0.0.33)(date-fns@3.3.1)(lodash@4.17.21)(p-min-delay@4.0.2)(pluralize@8.0.0)(typescript@5.3.3)(vee-validate@4.14.7(vue@3.3.4))(vue@3.3.4)(vuedraggable@4.1.0(vue@3.3.4))(vuetify@3.7.3)(yup@1.3.3)
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -737,8 +737,8 @@ packages:
   '@tailor-cms/cek-common@0.0.3':
     resolution: {integrity: sha512-QZGKfGb8sdmS/4U2ZdbG8VKD816Q2AoL4t23/WGXyo5wgpdjw4n9eNYNTwv8kp/pE02LzSBG+CUOMTb3UAqPoA==}
 
-  '@tailor-cms/core-components@1.0.30':
-    resolution: {integrity: sha512-TQKzmVhUABYlhVtjl9snkxj8wGX+90QxCk6J5h3UUCgpPLc6EAzGDT3nm4ZMiSYGzAQk6DMNVNIC3NbrMZc1aA==}
+  '@tailor-cms/core-components@1.0.32':
+    resolution: {integrity: sha512-uBiK7PZ/N1PokeSnpNnjbryatsHW9ypaRPswbRqwGDhCPe3XfLfoBCt5/MBAfux4a+wBKtfYsRpTByapkjqzcg==}
     peerDependencies:
       '@tailor-cms/utils': 1.0.1
       '@tiptap/pm': ^2.4.0
@@ -774,8 +774,8 @@ packages:
       eslint-plugin-vue: '>=9.17.0'
       eslint-plugin-vuejs-accessibility: '>=2.2.0'
 
-  '@tailor-cms/lx-components@0.0.3':
-    resolution: {integrity: sha512-M2XfRbTSO93ezR59FO/GIDwaKlL56peQOZVUkbxeARi6kEH1tkHYonens40s10eUI+P1X+oiWNpetArS3lKtBQ==}
+  '@tailor-cms/lx-components@0.0.4':
+    resolution: {integrity: sha512-1u6ZrhDR072X9ybRTksLTnorcmRQqh+rAve3BJ68AJ8V0opvvxBOk/MTq/NkHx1IID4nKh4pu6paWqK+KZP1vg==}
     peerDependencies:
       '@types/lodash': ^4.17.10
       lodash: ^4.17.21
@@ -4574,7 +4574,7 @@ snapshots:
 
   '@tailor-cms/cek-common@0.0.3': {}
 
-  '@tailor-cms/core-components@1.0.30(@tailor-cms/utils@1.0.1)(@tiptap/core@2.10.3(@tiptap/pm@2.10.3))(@tiptap/pm@2.10.3)(@tiptap/starter-kit@2.10.3)(@tiptap/vue-3@2.10.3(@tiptap/core@2.10.3(@tiptap/pm@2.10.3))(@tiptap/pm@2.10.3)(vue@3.3.4))(@types/lodash@4.17.10)(@types/pluralize@0.0.33)(date-fns@3.3.1)(lodash@4.17.21)(p-min-delay@4.0.2)(pluralize@8.0.0)(typescript@5.3.3)(vee-validate@4.14.7(vue@3.3.4))(vue@3.3.4)(vuedraggable@4.1.0(vue@3.3.4))(vuetify@3.7.3)(yup@1.3.3)':
+  '@tailor-cms/core-components@1.0.32(@tailor-cms/utils@1.0.1)(@tiptap/core@2.10.3(@tiptap/pm@2.10.3))(@tiptap/pm@2.10.3)(@tiptap/starter-kit@2.10.3)(@tiptap/vue-3@2.10.3(@tiptap/core@2.10.3(@tiptap/pm@2.10.3))(@tiptap/pm@2.10.3)(vue@3.3.4))(@types/lodash@4.17.10)(@types/pluralize@0.0.33)(date-fns@3.3.1)(lodash@4.17.21)(p-min-delay@4.0.2)(pluralize@8.0.0)(typescript@5.3.3)(vee-validate@4.14.7(vue@3.3.4))(vue@3.3.4)(vuedraggable@4.1.0(vue@3.3.4))(vuetify@3.7.3)(yup@1.3.3)':
     dependencies:
       '@tailor-cms/utils': 1.0.1
       '@tiptap/extension-character-count': 2.10.3(@tiptap/core@2.10.3(@tiptap/pm@2.10.3))(@tiptap/pm@2.10.3)
@@ -4618,7 +4618,7 @@ snapshots:
       eslint-plugin-vue: 9.21.1(eslint@8.56.0)
       eslint-plugin-vuejs-accessibility: 2.2.1(eslint@8.56.0)
 
-  '@tailor-cms/lx-components@0.0.3(@types/lodash@4.17.10)(lodash@4.17.21)(vue@3.3.4)(vuetify@3.7.3)':
+  '@tailor-cms/lx-components@0.0.4(@types/lodash@4.17.10)(lodash@4.17.21)(vue@3.3.4)(vuetify@3.7.3)':
     dependencies:
       '@types/lodash': 4.17.10
       lodash: 4.17.21

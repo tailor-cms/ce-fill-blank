@@ -1,5 +1,11 @@
 # @tailor-cms/ce-fill-blank-edit
 
+## 0.0.11
+
+### Patch Changes
+
+- Revert to old structutre with question prop.
+
 ## 0.0.10
 
 ### Patch Changes
