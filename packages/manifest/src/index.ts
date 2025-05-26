@@ -8,7 +8,7 @@ import type {
 export const type = 'FILL_BLANK';
 
 // Display name (e.g. shown to the author)
-export const name = 'Fill in the blank';
+export const name = 'Fill In The Blank';
 
 // Function which inits element state (data property on the Content Element
 // entity)

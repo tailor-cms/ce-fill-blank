@@ -63,7 +63,7 @@ export function onUserInteraction(
   }
   // Can have arbitrary return value (interpreted by target system)
   // FE is updated if updateDisplayState is true
-  return { updateDisplayState: true };
+  return { isCorrect, updateDisplayState: true };
 }
 
 export const hookMap = new Map(
