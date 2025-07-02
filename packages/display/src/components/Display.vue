@@ -1,6 +1,6 @@
 <template>
   <QuestionContainer
-    :data="data"
+    :data="element.data"
     :is-correct="userState.isCorrect"
     :is-graded="isGraded"
     :is-submitted="isSubmitted"
@@ -33,19 +33,17 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { ElementData } from '@tailor-cms/ce-fill-blank-manifest';
-import map from 'lodash/map';
+import { map, sortBy, times } from 'lodash-es';
+import { Element } from '@tailor-cms/ce-fill-blank-manifest';
 import { QuestionContainer } from '@tailor-cms/lx-components';
-import sortyBy from 'lodash/sortBy';
-import times from 'lodash/times';
 
 const BLANK = /(@blank)/g;
 
-const props = defineProps<{ id: number; data: ElementData; userState: any }>();
+const props = defineProps<{ element: Element; userState: any }>();
 const emit = defineEmits(['interaction']);
 
 const blankCount = computed(() => {
-  const sortedEmbeds = sortyBy(props.data.embeds, 'position');
+  const sortedEmbeds = sortBy(props.element.data.embeds, 'position');
   const questionData = map(sortedEmbeds, 'data.content');
   return questionData.toString().match(BLANK)?.length ?? 0;
 });
@@ -78,7 +76,7 @@ watch(
 );
 
 watch(
-  () => props.data,
+  () => props.element.data,
   () => {
     response.value = initializeResponse();
   },
@@ -87,11 +85,6 @@ watch(
 </script>
 
 <style lang="scss" scoped>
-.tce-root {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 1rem;
-}
-
 :deep(.v-input__control) {
   display: block;
 }
