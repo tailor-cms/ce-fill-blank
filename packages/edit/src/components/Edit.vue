@@ -1,15 +1,15 @@
 <template>
   <QuestionContainer
-    v-bind="{ elementData, embedElementConfig, isDisabled }"
+    v-bind="{ elementData, embedElementConfig, isReadonly }"
     :show-feedback="false"
     @update="emit('update', $event)"
   >
     <div class="d-flex text-subtitle-2 justify-space-between mb-2">
       <span v-if="isGradable">Answers</span>
-      <span v-else-if="!isDisabled">
+      <span v-else-if="!isReadonly">
         {{ blankCount }} {{ pluralize('blank', blankCount) }} detected.
       </span>
-      <span v-if="!isDisabled">Type '@blank' when new blank is needed.</span>
+      <span v-if="!isReadonly">Type '@blank' when new blank is needed.</span>
     </div>
     <VInput
       v-if="elementData.correct?.length"
@@ -19,7 +19,7 @@
     >
       <Draggable
         :component-data="{ class: 'd-flex flex-column w-100 ga-4' }"
-        :disabled="isDisabled"
+        :disabled="isReadonly"
         :model-value="elementData.correct"
         animation="150"
         handle=".drag-handle"
@@ -30,7 +30,7 @@
           <div>
             <div class="d-flex mb-4">
               <VIcon
-                v-if="!isDisabled"
+                v-if="!isReadonly"
                 class="drag-handle"
                 color="grey"
                 icon="mdi-drag-vertical"
@@ -46,7 +46,7 @@
               </VChip>
               <VSpacer />
               <VBtn
-                v-if="!isDisabled && !isSynced"
+                v-if="!isReadonly && !isSynced"
                 color="secondary-lighten-1"
                 size="x-small"
                 variant="tonal"
@@ -61,14 +61,14 @@
                 v-for="(answer, index) in group"
                 :key="`${groupIndex}.${index}`"
                 :model-value="answer"
-                :readonly="isDisabled"
+                :readonly="isReadonly"
                 :rules="[rules.required]"
                 class="my-2"
                 placeholder="Answer..."
                 variant="outlined"
                 @update:model-value="updateAnswer(groupIndex, index, $event)"
               >
-                <template v-if="!isDisabled && group.length > 1" #append>
+                <template v-if="!isReadonly && group.length > 1" #append>
                   <VBtn
                     aria-label="Remove answer"
                     color="primary-darken-4"
@@ -82,7 +82,7 @@
                 </template>
               </VTextField>
             </VSlideYTransition>
-            <div v-if="!isDisabled" class="d-flex justify-end">
+            <div v-if="!isReadonly" class="d-flex justify-end">
               <VBtn
                 color="primary-darken-4"
                 prepend-icon="mdi-plus"
@@ -100,15 +100,12 @@
 </template>
 
 <script lang="ts" setup>
+import { cloneDeep, map, pullAt, sortBy } from 'lodash-es';
 import { computed, defineEmits, defineProps, watch } from 'vue';
-import cloneDeep from 'lodash/cloneDeep';
 import Draggable from 'vuedraggable/src/vuedraggable';
 import { Element } from '@tailor-cms/ce-fill-blank-manifest';
-import map from 'lodash/map';
 import pluralize from 'pluralize';
-import pullAt from 'lodash/pullAt';
 import { QuestionContainer } from '@tailor-cms/core-components';
-import sortyBy from 'lodash/sortBy';
 
 const BLANK = /(@blank)/g;
 const SYNC_ERROR = `
@@ -126,8 +123,9 @@ const rules = {
 const props = defineProps<{
   element: Element;
   embedElementConfig: any[];
+  isDragged: boolean;
   isFocused: boolean;
-  isDisabled: boolean;
+  isReadonly: boolean;
 }>();
 const emit = defineEmits(['save', 'update']);
 
@@ -135,7 +133,7 @@ const elementData = computed(() => props.element.data);
 const isGradable = computed(() => elementData.value.isGradable);
 
 const blankCount = computed(() => {
-  const sortedEmbeds = sortyBy(elementData.value.embeds, 'position');
+  const sortedEmbeds = sortBy(elementData.value.embeds, 'position');
   const questionData = map(sortedEmbeds, 'data.content');
   return questionData.toString().match(BLANK)?.length ?? 0;
 });
