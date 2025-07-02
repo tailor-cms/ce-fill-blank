@@ -118,14 +118,17 @@ importers:
 
   packages/manifest:
     devDependencies:
+      '@tailor-cms/cek-common':
+        specifier: ^1.2.6
+        version: 1.2.6
       '@tailor-cms/eslint-config':
-        specifier: 0.0.2
-        version: 0.0.2(eeedfac0762f0de0ea3178c386026e02)
+        specifier: 1.0.3
+        version: 1.0.3(@typescript-eslint/parser@8.35.1(eslint@9.30.1)(typescript@5.8.3))(@typescript-eslint/utils@8.35.1(eslint@9.30.1)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint@9.30.1)(prettier@3.6.2)(typescript@5.8.3)
       tsup:
-        specifier: ^8.3.6
+        specifier: ^8.5.0
         version: 8.5.0(postcss@8.5.6)(typescript@5.8.3)
       typescript:
-        specifier: ^5.7.3
+        specifier: ^5.8.3
         version: 5.8.3
 
   packages/server:
@@ -6518,7 +6521,7 @@ snapshots:
       eslint: 9.30.1
       eslint-import-context: 0.1.9(unrs-resolver@1.9.2)
       is-glob: 4.0.3
-      minimatch: 9.0.5
+      minimatch: 10.0.3
       semver: 7.7.2
       stable-hash-x: 0.2.0
       unrs-resolver: 1.9.2
