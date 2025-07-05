@@ -17,10 +17,11 @@
         :label="`@blank #${index}`"
         :readonly="isSubmitted"
         :rules="[(val: string) => !!val || 'Answer is required']"
+        bg-color="white"
         placeholder="Answer..."
         variant="outlined"
       >
-        <template v-if="isSubmitted && isGraded" #append>
+        <template v-if="isSubmitted && isGraded" #append-inner>
           <VIcon
             :color="isCorrect(index - 1) ? 'success' : 'error'"
             :icon="`mdi-${isCorrect(index - 1) ? 'check' : 'close'}-circle`"
