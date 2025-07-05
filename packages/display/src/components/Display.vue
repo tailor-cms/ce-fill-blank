@@ -1,6 +1,6 @@
 <template>
   <QuestionContainer
-    :data="element.data"
+    :data="parsedData"
     :is-correct="userState.isCorrect"
     :is-graded="isGraded"
     :is-submitted="isSubmitted"
@@ -14,7 +14,7 @@
         v-for="index in blankCount"
         :key="index"
         v-model="response[index - 1]"
-        :label="`@blank #${index}`"
+        :label="`Answer ${index}`"
         :readonly="isSubmitted"
         :rules="[(val: string) => !!val || 'Answer is required']"
         bg-color="white"
@@ -33,8 +33,8 @@
 </template>
 
 <script setup lang="ts">
+import { cloneDeep, map, mapValues, sortBy, times } from 'lodash-es';
 import { computed, ref, watch } from 'vue';
-import { map, sortBy, times } from 'lodash-es';
 import { Element } from '@tailor-cms/ce-fill-blank-manifest';
 import { QuestionContainer } from '@tailor-cms/lx-components';
 
@@ -47,6 +47,14 @@ const blankCount = computed(() => {
   const sortedEmbeds = sortBy(props.element.data.embeds, 'position');
   const questionData = map(sortedEmbeds, 'data.content');
   return questionData.toString().match(BLANK)?.length ?? 0;
+});
+
+const parsedData = computed(() => {
+  const data = cloneDeep(props.element.data);
+  mapValues(data.embeds, (embed: any) => {
+    embed.data.content = embed.data.content.replace(BLANK, '__________');
+  });
+  return data;
 });
 
 const initializeResponse = () =>
