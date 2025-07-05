@@ -34,11 +34,11 @@
     "@types/pluralize": "^0.0.33",
     "@vitejs/plugin-vue": "^6.0.0",
     "typescript": "^5.8.3",
-    "vite": "^7.0.0",
+    "vite": "^7.0.2",
     "vue-tsc": "^3.0.1"
   },
   "dependencies": {
-    "@tailor-cms/core-components": "^1.1.1",
+    "@tailor-cms/core-components": "^1.1.2",
     "lodash-es": "^4.17.21",
     "pluralize-esm": "^9.0.5",
     "vuedraggable": "^4.1.0"

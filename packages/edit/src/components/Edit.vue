@@ -23,7 +23,7 @@
         :model-value="elementData.correct"
         animation="150"
         handle=".drag-handle"
-        item-key="id"
+        item-key="index"
         @update:model-value="emit('update', { correct: $event })"
       >
         <template #item="{ element: group, index: groupIndex }">
@@ -104,7 +104,7 @@ import { cloneDeep, map, pullAt, sortBy } from 'lodash-es';
 import { computed, defineEmits, defineProps, watch } from 'vue';
 import Draggable from 'vuedraggable/src/vuedraggable';
 import { Element } from '@tailor-cms/ce-fill-blank-manifest';
-import pluralize from 'pluralize';
+import pluralize from 'pluralize-esm';
 import { QuestionContainer } from '@tailor-cms/core-components';
 
 const BLANK = /(@blank)/g;
