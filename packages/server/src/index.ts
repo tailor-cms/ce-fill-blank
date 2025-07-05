@@ -1,6 +1,6 @@
+import { ai, initState, type } from '@tailor-cms/ce-fill-blank-manifest';
 import { every, omit } from 'lodash-es';
 import type { HookServices, ServerRuntime } from '@tailor-cms/cek-common';
-import { initState, type } from '@tailor-cms/ce-fill-blank-manifest';
 import type { Element } from '@tailor-cms/ce-fill-blank-manifest';
 
 // Detect if hooks are running in CEK (used for mocking end-system runtime)
@@ -84,6 +84,7 @@ export default {
   afterRetrieve,
   onUserInteraction,
   beforeDisplay,
+  ai,
 };
 
-export { type, initState };
+export { type, initState, ai };
