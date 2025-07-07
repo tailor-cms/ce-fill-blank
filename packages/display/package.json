@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@tailor-cms/ce-fill-blank-manifest": "workspace:*",
-    "@tailor-cms/eslint-config": "1.0.3",
+    "@tailor-cms/eslint-config": "1.1.1",
     "@types/lodash-es": "^4.17.12",
     "@vitejs/plugin-vue": "^6.0.0",
     "typescript": "^5.8.3",
@@ -37,7 +37,7 @@
     "vue-tsc": "^3.0.1"
   },
   "dependencies": {
-    "@tailor-cms/lx-components": "^0.1.1",
+    "@tailor-cms/lx-components": "^0.1.2",
     "lodash-es": "^4.17.21"
   },
   "publishConfig": {

@@ -26,8 +26,8 @@
   },
   "devDependencies": {
     "@tailor-cms/ce-fill-blank-manifest": "workspace:*",
-    "@tailor-cms/cek-common": "^1.2.8",
-    "@tailor-cms/eslint-config": "1.0.3",
+    "@tailor-cms/cek-common": "^1.3.1",
+    "@tailor-cms/eslint-config": "1.1.1",
     "@types/lodash-es": "^4.17.12",
     "tsup": "^8.5.0",
     "typescript": "^5.8.3"
