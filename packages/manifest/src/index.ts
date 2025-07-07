@@ -76,22 +76,21 @@ export const ai = {
         correct answer in the hint, but provide a clue that helps the user to
         find the answer.
   `,
-  processResponse: ({ correct, hint, question }: any = {}) => {
-    const id = uuid();
+  processResponse: (val: any = {}) => {
+    const questionId = uuid();
+    const question = {
+      id: questionId,
+      data: { content: val.question },
+      embedded: true,
+      position: 1,
+      type: 'TIPTAP_HTML',
+    };
     return {
       isGradable: true,
-      question: [id],
-      correct,
-      hint,
-      embeds: {
-        [id]: {
-          id,
-          data: { content: question },
-          embedded: true,
-          position: 1,
-          type: 'TIPTAP_HTML',
-        },
-      },
+      correct: val.correct,
+      hint: val.hint || '',
+      question: [questionId],
+      embeds: { [questionId]: question },
     };
   },
 };
