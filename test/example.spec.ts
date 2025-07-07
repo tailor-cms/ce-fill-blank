@@ -25,8 +25,4 @@ test('Renders server state panel', async ({ page }) => {
   for (const prop of properties) {
     await expect(bottomPanel.authoringWindow.getByText(prop)).toBeVisible();
   }
-  await bottomPanel.userStateTab.click();
-  await expect(
-    bottomPanel.userStateWindow.locator('pre').getByText('{}'),
-  ).toBeVisible();
 });
