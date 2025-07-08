@@ -38,7 +38,7 @@
     "vue-tsc": "^3.0.1"
   },
   "dependencies": {
-    "@tailor-cms/core-components": "^1.1.2",
+    "@tailor-cms/core-components": "^1.2.0",
     "lodash-es": "^4.17.21",
     "pluralize-esm": "^9.0.5",
     "vuedraggable": "^4.1.0"
