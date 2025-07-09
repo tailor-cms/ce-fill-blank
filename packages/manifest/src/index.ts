@@ -1,3 +1,6 @@
+import { OpenAISchema } from '@tailor-cms/cek-common';
+import { v4 as uuid } from 'uuid';
+
 import type {
   DataInitializer,
   ElementData,
@@ -31,6 +34,67 @@ const ui = {
   forceFullWidth: true,
 };
 
+export const ai = {
+  Schema: {
+    type: 'json_schema',
+    name: 'ce_fill_blank',
+    schema: {
+      type: 'object',
+      properties: {
+        question: { type: 'string' },
+        correct: {
+          type: 'array',
+          items: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
+        },
+        hint: { type: 'string' },
+      },
+      required: ['question', 'correct', 'hint'],
+      additionalProperties: false,
+    },
+  } as OpenAISchema,
+  getPrompt: () => `
+    Generate a fill-in-the-blank question as an object with the following
+    properties:
+    {
+      "question": "",
+      "correct": [],
+      "hint": "",
+    }
+    where:
+      - 'question' is the question prompt with @blank placeholders
+        for the answers. The question can contain multiple blanks.
+      - 'correct' is an array of correct answers, where each answer is an array
+        of strings representing the correct answers for each blank. Each blank
+        can have multiple correct answers, which are different variants
+        of the same answer.
+      - 'hint' is an optional hint for the correct solution. Do not reveal the
+        correct answer in the hint, but provide a clue that helps the user to
+        find the answer.
+  `,
+  processResponse: (val: any = {}) => {
+    const questionId = uuid();
+    const question = {
+      id: questionId,
+      data: { content: val.question },
+      embedded: true,
+      position: 1,
+      type: 'TIPTAP_HTML',
+    };
+    return {
+      isGradable: true,
+      correct: val.correct,
+      hint: val.hint || '',
+      question: [questionId],
+      embeds: { [questionId]: question },
+    };
+  },
+};
+
 const manifest: ElementManifest = {
   type,
   version: '1.0',
@@ -40,6 +104,7 @@ const manifest: ElementManifest = {
   isQuestion: true,
   initState,
   ui,
+  ai,
 };
 
 export default manifest;

@@ -1,6 +1,6 @@
 <template>
   <QuestionContainer
-    :data="data"
+    :data="parsedData"
     :is-correct="userState.isCorrect"
     :is-graded="isGraded"
     :is-submitted="isSubmitted"
@@ -14,13 +14,14 @@
         v-for="index in blankCount"
         :key="index"
         v-model="response[index - 1]"
-        :label="`@blank #${index}`"
+        :label="`Answer ${index}`"
         :readonly="isSubmitted"
         :rules="[(val: string) => !!val || 'Answer is required']"
+        bg-color="white"
         placeholder="Answer..."
         variant="outlined"
       >
-        <template v-if="isSubmitted && isGraded" #append>
+        <template v-if="isSubmitted && isGraded" #append-inner>
           <VIcon
             :color="isCorrect(index - 1) ? 'success' : 'error'"
             :icon="`mdi-${isCorrect(index - 1) ? 'check' : 'close'}-circle`"
@@ -32,22 +33,28 @@
 </template>
 
 <script setup lang="ts">
+import { cloneDeep, map, mapValues, sortBy, times } from 'lodash-es';
 import { computed, ref, watch } from 'vue';
-import { ElementData } from '@tailor-cms/ce-fill-blank-manifest';
-import map from 'lodash/map';
+import { Element } from '@tailor-cms/ce-fill-blank-manifest';
 import { QuestionContainer } from '@tailor-cms/lx-components';
-import sortyBy from 'lodash/sortBy';
-import times from 'lodash/times';
 
 const BLANK = /(@blank)/g;
 
-const props = defineProps<{ id: number; data: ElementData; userState: any }>();
+const props = defineProps<{ element: Element; userState: any }>();
 const emit = defineEmits(['interaction']);
 
 const blankCount = computed(() => {
-  const sortedEmbeds = sortyBy(props.data.embeds, 'position');
+  const sortedEmbeds = sortBy(props.element.data.embeds, 'position');
   const questionData = map(sortedEmbeds, 'data.content');
   return questionData.toString().match(BLANK)?.length ?? 0;
+});
+
+const parsedData = computed(() => {
+  const data = cloneDeep(props.element.data);
+  mapValues(data.embeds, (embed: any) => {
+    embed.data.content = embed.data.content.replace(BLANK, '__________');
+  });
+  return data;
 });
 
 const initializeResponse = () =>
@@ -78,7 +85,7 @@ watch(
 );
 
 watch(
-  () => props.data,
+  () => props.element.data,
   () => {
     response.value = initializeResponse();
   },
@@ -87,11 +94,6 @@ watch(
 </script>
 
 <style lang="scss" scoped>
-.tce-root {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 1rem;
-}
-
 :deep(.v-input__control) {
   display: block;
 }
