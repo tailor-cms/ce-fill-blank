@@ -1,5 +1,40 @@
 # Changelog
 
+### v2.0.0 2026-04-25
+
+Part of the [Tailor CEK v2 release line][xt-v2]. The four subpackages
+(`@tailor-cms/ce-fill-blank-display`, `-edit`, `-manifest`, `-server`)
+now release in lockstep.
+
+[xt-v2]: https://github.com/tailor-cms/xt/blob/main/CHANGELOG.md#v200-2026-04-25
+
+#### Breaking changes
+- Requires **Vuetify 4** and **Node `>=24`**
+- Consumes `@tailor-cms/cek-common@^2.0.0`
+- **Display** no longer emits `interaction` or exposes a `submit()`
+  method. It emits `user-input` reactively whenever the response changes;
+  the runtime's `QuestionForm` wrapper owns submission, validation, hint
+  toggle, and feedback rendering
+- Display template no longer renders submit/retry buttons, hint panel, or
+  feedback alert — these moved to the wrapper. `.question-form` /
+  `.question-hint` / `.question-feedback` CSS classes are now owned by
+  the wrapper
+- **Edit** emits `@update` with partial data, not `@save` with the full
+  element data
+- `initState(config)` receives an `InitConfig` object; `correct` is only
+  included when `config.isGradable` is true
+- `showFeedback: false` — per-answer feedback section is hidden in the
+  `QuestionForm` wrapper
+
+#### Features
+- `isEmpty(data)` manifest function for required-content validation
+- `mocks.displayContexts` presets for previewing each submission state
+  (no answer, correct answer, wrong answer) in the CEK display runtime
+
+See the [xt v2.0.0 release notes][xt-v2] for the CEK v2 platform migration
+guide.
+
+
 ### v0.5.1 2024-04-05
 
 #### Changes
