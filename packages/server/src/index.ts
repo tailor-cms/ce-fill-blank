@@ -1,3 +1,4 @@
+import { ai, initState, mocks, type } from '@tailor-cms/ce-fill-blank-manifest';
 import type {
   BeforeDisplayHook,
   ElementHook,
@@ -5,16 +6,19 @@ import type {
   OnUserInteractionHook,
   ServerModule,
 } from '@tailor-cms/cek-common';
-import { ai, initState, mocks, type } from '@tailor-cms/ce-fill-blank-manifest';
-import type { Element } from '@tailor-cms/ce-fill-blank-manifest';
 import { every, omit } from 'lodash-es';
+import type { Element } from '@tailor-cms/ce-fill-blank-manifest';
 
 // Detect if hooks are running in CEK (used for mocking end-system runtime)
 const IS_CEK = process.env.CEK_RUNTIME;
 // Don't use in production, use only when IS_CEK=true
 const USER_STATE: any = {};
 
-export const afterLoaded: ElementHook<Element> = (element, _services, runtime) => {
+export const afterLoaded: ElementHook<Element> = (
+  element,
+  _services,
+  runtime,
+) => {
   if (runtime === 'delivery') {
     const data = omit(element.data, ['correct']) as Element['data'];
     return Object.assign(element, { data });
