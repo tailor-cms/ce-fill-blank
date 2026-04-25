@@ -1,14 +1,6 @@
 <template>
-  <QuestionContainer
-    :data="parsedData"
-    :is-correct="userState.isCorrect"
-    :is-graded="isGraded"
-    :is-submitted="isSubmitted"
-    allowed-retake
-    @retry="isSubmitted = false"
-    @submit="submit"
-  >
-    <div class="text-subtitle-2 mb-4">Enter your answer(s):</div>
+  <div class="tce-fill-blank">
+    <div class="text-title-small mb-4">Enter your answer(s):</div>
     <div class="d-flex flex-column ga-2">
       <VTextField
         v-for="index in blankCount"
@@ -17,7 +9,6 @@
         :label="`Answer ${index}`"
         :readonly="isSubmitted"
         :rules="[(val: string) => !!val || 'Answer is required']"
-        bg-color="white"
         placeholder="Answer..."
         variant="outlined"
       >
@@ -29,32 +20,25 @@
         </template>
       </VTextField>
     </div>
-  </QuestionContainer>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { cloneDeep, map, mapValues, sortBy, times } from 'lodash-es';
 import { computed, ref, watch } from 'vue';
-import { Element } from '@tailor-cms/ce-fill-blank-manifest';
-import { QuestionContainer } from '@tailor-cms/lx-components';
+import { map, sortBy, times } from 'lodash-es';
+import type { Element } from '@tailor-cms/ce-fill-blank-manifest';
 
 const BLANK = /(@blank)/g;
 
 const props = defineProps<{ element: Element; userState: any }>();
-const emit = defineEmits(['interaction']);
+const emit = defineEmits<{
+  'user-input': [data: { response: string[] }];
+}>();
 
 const blankCount = computed(() => {
   const sortedEmbeds = sortBy(props.element.data.embeds, 'position');
   const questionData = map(sortedEmbeds, 'data.content');
   return questionData.toString().match(BLANK)?.length ?? 0;
-});
-
-const parsedData = computed(() => {
-  const data = cloneDeep(props.element.data);
-  mapValues(data.embeds, (embed: any) => {
-    embed.data.content = embed.data.content.replace(BLANK, '__________');
-  });
-  return data;
 });
 
 const initializeResponse = () =>
@@ -65,14 +49,14 @@ const response = ref<string[]>(initializeResponse());
 
 const isGraded = computed(() => 'isCorrect' in props.userState);
 
-const submit = () => emit('interaction', { response: response.value });
+watch(response, (val) => emit('user-input', { response: val }), { deep: true });
 
 const isCorrect = (index: number) => {
-  const response = props.userState.response?.[index]?.toLowerCase();
+  const userResponse = props.userState.response?.[index]?.toLowerCase();
   const correct = props.userState.correct?.[index]?.map((it: string) =>
     it.toLowerCase(),
   );
-  return correct?.includes(response);
+  return correct?.includes(userResponse);
 };
 
 watch(
@@ -94,6 +78,10 @@ watch(
 </script>
 
 <style lang="scss" scoped>
+.tce-fill-blank {
+  text-align: left;
+}
+
 :deep(.v-input__control) {
   display: block;
 }

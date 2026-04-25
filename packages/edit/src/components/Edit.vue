@@ -1,10 +1,6 @@
 <template>
-  <QuestionContainer
-    v-bind="{ elementData, embedElementConfig, isReadonly }"
-    :show-feedback="false"
-    @update="emit('update', $event)"
-  >
-    <div class="d-flex text-subtitle-2 justify-space-between mb-2">
+  <div class="tce-fill-blank">
+    <div class="d-flex text-title-small justify-space-between mb-2">
       <span v-if="isGradable">Answers</span>
       <span v-else-if="!isReadonly">
         {{ blankCount }} {{ pluralize('blank', blankCount) }} detected.
@@ -47,14 +43,13 @@
               <VSpacer />
               <VBtn
                 v-if="!isReadonly && !isSynced"
+                aria-label="Remove group"
                 color="secondary-lighten-1"
+                icon="mdi-delete-outline"
                 size="x-small"
                 variant="tonal"
-                icon
                 @click="removeGroup(groupIndex)"
-              >
-                <VIcon icon="mdi-delete-outline" size="large" />
-              </VBtn>
+              />
             </div>
             <VSlideYTransition group>
               <VTextField
@@ -66,19 +61,19 @@
                 class="my-2"
                 placeholder="Answer..."
                 variant="outlined"
-                @update:model-value="updateAnswer(groupIndex, index, $event)"
+                @update:model-value="
+                  updateAnswer(groupIndex, index as number, $event)
+                "
               >
                 <template v-if="!isReadonly && group.length > 1" #append>
                   <VBtn
                     aria-label="Remove answer"
                     color="primary-darken-4"
+                    icon="mdi-close"
                     size="x-small"
                     variant="text"
-                    icon
-                    @click="removeAnswer(groupIndex, index)"
-                  >
-                    <VIcon icon="mdi-close" size="large" />
-                  </VBtn>
+                    @click="removeAnswer(groupIndex, index as number)"
+                  />
                 </template>
               </VTextField>
             </VSlideYTransition>
@@ -86,39 +81,30 @@
               <VBtn
                 color="primary-darken-4"
                 prepend-icon="mdi-plus"
+                text="Add Answer"
                 variant="text"
                 @click="addAnswer(groupIndex)"
-              >
-                Add Answer
-              </VBtn>
+              />
             </div>
           </div>
         </template>
       </Draggable>
     </VInput>
-  </QuestionContainer>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import { cloneDeep, map, pullAt, sortBy } from 'lodash-es';
-import { computed, defineEmits, defineProps, watch } from 'vue';
+import { computed, watch } from 'vue';
+import type { Element, ElementData } from '@tailor-cms/ce-fill-blank-manifest';
 import Draggable from 'vuedraggable/src/vuedraggable';
-import { Element } from '@tailor-cms/ce-fill-blank-manifest';
 import pluralize from 'pluralize-esm';
-import { QuestionContainer } from '@tailor-cms/core-components';
 
 const BLANK = /(@blank)/g;
 const SYNC_ERROR = `
   Question and blanks are out of sync! Please delete unnecessary answer groups
   or add blanks in the question!
 `;
-
-const rules = {
-  required: (val: string) => !!val || 'The field is required',
-  isSynced: (val: string[][]) => val.length === blankCount.value || SYNC_ERROR,
-  hasBlanks: (val: string) =>
-    !!val.match(BLANK) || 'At least one @blank required.',
-};
 
 const props = defineProps<{
   element: Element;
@@ -127,7 +113,10 @@ const props = defineProps<{
   isFocused: boolean;
   isReadonly: boolean;
 }>();
-const emit = defineEmits(['save', 'update']);
+
+const emit = defineEmits<{
+  update: [data: Partial<ElementData>];
+}>();
 
 const elementData = computed(() => props.element.data);
 const isGradable = computed(() => elementData.value.isGradable);
@@ -142,6 +131,13 @@ const isSynced = computed(() => {
   const correct = elementData.value.correct;
   return !correct || blankCount.value === correct.length;
 });
+
+const rules = {
+  required: (val: string) => !!val || 'The field is required',
+  isSynced: (val: string[][]) => val.length === blankCount.value || SYNC_ERROR,
+  hasBlanks: (val: string) =>
+    !!val.match(BLANK) || 'At least one @blank required.',
+};
 
 const addAnswer = (index: number) => {
   const correct = cloneDeep(elementData.value.correct);
@@ -182,7 +178,7 @@ watch(blankCount, (val) => {
 </script>
 
 <style lang="scss" scoped>
-.tce-container {
+.tce-fill-blank {
   text-align: left;
 }
 

@@ -1,4 +1,4 @@
-import { OpenAISchema } from '@tailor-cms/cek-common';
+import type { AiConfig, ElementMocks } from '@tailor-cms/cek-common';
 import { v4 as uuid } from 'uuid';
 
 import type {
@@ -15,15 +15,35 @@ export const name = 'Fill In The Blank';
 
 // Function which inits element state (data property on the Content Element
 // entity)
-export const initState: DataInitializer = (): ElementData => ({
-  embeds: {},
-  question: [],
-  correct: [],
-  hint: '',
-});
+export const initState: DataInitializer = (config): ElementData => {
+  const isGradable = config?.isGradable ?? true;
+  return {
+    isGradable,
+    embeds: {},
+    question: [],
+    hint: '',
+    ...(isGradable && { correct: [] }),
+  };
+};
 
 // Can be loaded from package.json
 export const version = '1.0';
+
+export const isEmpty = (data: ElementData): boolean => !data.question?.length;
+
+export const mocks: ElementMocks = {
+  displayContexts: [
+    { name: 'No answer', data: {} },
+    {
+      name: 'Correct answer',
+      data: { isCorrect: true, isSubmitted: true },
+    },
+    {
+      name: 'Wrong answer',
+      data: { isCorrect: false, isSubmitted: true },
+    },
+  ],
+};
 
 // UI configuration for Tailor CMS
 const ui = {
@@ -34,7 +54,7 @@ const ui = {
   forceFullWidth: true,
 };
 
-export const ai = {
+export const ai: AiConfig = {
   Schema: {
     type: 'json_schema',
     name: 'ce_fill_blank',
@@ -56,7 +76,7 @@ export const ai = {
       required: ['question', 'correct', 'hint'],
       additionalProperties: false,
     },
-  } as OpenAISchema,
+  },
   getPrompt: () => `
     Generate a fill-in-the-blank question as an object with the following
     properties:
@@ -97,14 +117,17 @@ export const ai = {
 
 const manifest: ElementManifest = {
   type,
-  version: '1.0',
+  version,
   name,
   ssr: false,
   isComposite: true,
   isQuestion: true,
+  showFeedback: false,
   initState,
+  isEmpty,
   ui,
   ai,
+  mocks,
 };
 
 export default manifest;
