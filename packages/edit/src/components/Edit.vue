@@ -33,7 +33,7 @@
               />
               <VChip
                 class="font-weight-bold"
-                color="primary-darken-3"
+                color="surface-container-highest"
                 size="small"
                 variant="flat"
                 label
@@ -44,7 +44,7 @@
               <VBtn
                 v-if="!isReadonly && !isSynced"
                 aria-label="Remove group"
-                color="secondary-lighten-1"
+                color="error"
                 icon="mdi-delete-outline"
                 size="x-small"
                 variant="tonal"
@@ -68,9 +68,9 @@
                 <template v-if="!isReadonly && group.length > 1" #append>
                   <VBtn
                     aria-label="Remove answer"
-                    color="primary-darken-4"
+                    density="comfortable"
                     icon="mdi-close"
-                    size="x-small"
+                    size="small"
                     variant="text"
                     @click="removeAnswer(groupIndex, index as number)"
                   />
@@ -79,7 +79,6 @@
             </VSlideYTransition>
             <div v-if="!isReadonly" class="d-flex justify-end">
               <VBtn
-                color="primary-darken-4"
                 prepend-icon="mdi-plus"
                 text="Add Answer"
                 variant="text"
