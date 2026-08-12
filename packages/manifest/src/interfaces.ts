@@ -6,6 +6,7 @@ export interface ElementData extends common.ElementConfig {
   question: string[];
   correct?: string[][];
   hint: string;
+  feedback?: common.QuestionFeedback;
 }
 
 export type DataInitializer = common.DataInitializer<ElementData>;

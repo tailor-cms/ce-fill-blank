@@ -1,4 +1,3 @@
-import { ai, initState, mocks, type } from '@tailor-cms/ce-fill-blank-manifest';
 import type {
   BeforeDisplayHook,
   ElementHook,
@@ -8,6 +7,7 @@ import type {
 } from '@tailor-cms/cek-common';
 import { every, omit } from 'lodash-es';
 import type { Element } from '@tailor-cms/ce-fill-blank-manifest';
+import manifest from '@tailor-cms/ce-fill-blank-manifest';
 
 // Detect if hooks are running in CEK (used for mocking end-system runtime)
 const IS_CEK = process.env.CEK_RUNTIME;
@@ -60,16 +60,11 @@ export const hookMap: HookMap<Element> = new Map(
 );
 
 const serverModule: ServerModule<Element> = {
-  type,
-  initState,
+  ...manifest,
   hookMap,
   afterLoaded,
   beforeDisplay,
   onUserInteraction,
-  mocks,
-  ai,
 };
 
 export default serverModule;
-
-export { type, initState, mocks, ai };

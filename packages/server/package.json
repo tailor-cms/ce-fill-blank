@@ -11,7 +11,7 @@
   "homepage": "https://github.com/tailor-cms/ce-fill-blank#readme",
   "bugs": "https://github.com/tailor-cms/ce-fill-blank/issues",
   "type": "module",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
@@ -34,11 +34,11 @@
   },
   "dependencies": {
     "@tailor-cms/ce-fill-blank-manifest": "workspace:*",
-    "@tailor-cms/cek-common": "2.0.3",
+    "@tailor-cms/cek-common": "2.1.0",
     "lodash-es": "^4.18.1"
   },
   "devDependencies": {
-    "@tailor-cms/eslint-config": "2.0.3",
+    "@tailor-cms/eslint-config": "2.1.0",
     "@types/lodash-es": "^4.17.12",
     "tsdown": "^0.22.14",
     "typescript": "^6.0.3"
