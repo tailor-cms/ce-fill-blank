@@ -11,7 +11,7 @@ export class Edit extends pom.EditPanel {
     super(page);
     this.form = new pom.EditQuestionForm(this.el);
     this.root = this.form.el.locator('.tce-fill-blank');
-    this.groups = this.root.locator('.d-flex.flex-column > div');
+    this.groups = this.root.locator('.group-card');
     this.answerInputs = this.root.getByPlaceholder('Answer...');
   }
 }
