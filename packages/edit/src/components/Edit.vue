@@ -1,103 +1,139 @@
 <template>
-  <div class="tce-fill-blank">
-    <div class="d-flex text-title-small justify-space-between mb-2">
-      <span v-if="isGradable">Answers</span>
-      <span v-else-if="!isReadonly">
-        {{ blankCount }} {{ pluralize('blank', blankCount) }} detected.
+  <div class="tce-fill-blank mb-6">
+    <div class="d-flex align-center justify-space-between mb-3">
+      <span class="text-label-large">
+        <template v-if="isGradable">Answers</template>
+        <template v-else-if="!isReadonly">
+          {{ blankCount }} {{ pluralize('blank', blankCount) }} detected.
+        </template>
       </span>
-      <span v-if="!isReadonly">Type '@blank' when new blank is needed.</span>
-    </div>
-    <VInput
-      v-if="elementData.correct?.length"
-      :model-value="elementData.correct"
-      :rules="[rules.isSynced]"
-      class="mb-4"
-    >
-      <Draggable
-        :component-data="{ class: 'd-flex flex-column w-100 ga-4' }"
-        :disabled="isReadonly"
-        :model-value="elementData.correct"
-        animation="150"
-        handle=".drag-handle"
-        item-key="index"
-        @update:model-value="emit('update', { correct: $event })"
+      <span
+        v-if="!isReadonly && !showEmptyState"
+        class="text-label-medium text-medium-emphasis"
       >
-        <template #item="{ element: group, index: groupIndex }">
-          <div>
-            <div class="d-flex mb-4">
+        Type '@blank' when new blank is needed.
+      </span>
+    </div>
+    <VExpandTransition mode="out-in">
+      <VAlert
+        v-if="showEmptyState"
+        color="surface-container"
+        icon="mdi-information-outline"
+        prominent
+      >
+        <template v-if="isReadonly">
+          No blanks have been added to this question.
+        </template>
+        <template v-else>
+          Type '@blank' in the question above to add a blank and its answers.
+        </template>
+      </VAlert>
+      <VInput
+        v-else-if="hasGroups"
+        :model-value="elementData.correct"
+        :rules="[rules.isSynced, rules.allFilled]"
+        max-errors="2"
+      >
+        <VueDraggable
+          :animation="150"
+          :model-value="groups"
+          class="d-flex flex-column w-100 ga-4"
+          handle=".drag-handle"
+          @update:model-value="emit('update', { correct: $event })"
+        >
+          <VSheet
+            v-for="(group, groupIndex) in groups"
+            :key="groupIndex"
+            class="group-card pa-2"
+            border
+            rounded
+          >
+            <div class="d-flex align-center py-2 pr-2 mb-3">
               <VIcon
                 v-if="!isReadonly"
                 class="drag-handle"
-                color="grey"
                 icon="mdi-drag-vertical"
               />
               <VChip
-                class="font-weight-bold"
-                color="surface-container-highest"
+                :text="`Blank ${groupIndex + 1}`"
+                class="font-weight-bold ml-2"
+                color="secondary"
                 size="small"
-                variant="flat"
-                label
-              >
-                {{ groupIndex + 1 }}
-              </VChip>
+                variant="tonal"
+              />
               <VSpacer />
               <VBtn
                 v-if="!isReadonly && !isSynced"
                 aria-label="Remove group"
                 color="error"
-                icon="mdi-delete-outline"
-                size="x-small"
-                variant="tonal"
+                density="comfortable"
+                icon="mdi-trash-can-outline"
+                size="small"
+                variant="text"
                 @click="removeGroup(groupIndex)"
               />
             </div>
-            <VSlideYTransition group>
-              <VTextField
-                v-for="(answer, index) in group"
-                :key="`${groupIndex}.${index}`"
-                :model-value="answer"
-                :readonly="isReadonly"
-                :rules="[rules.required]"
-                class="my-2"
-                placeholder="Answer..."
-                variant="outlined"
-                @update:model-value="
-                  updateAnswer(groupIndex, index as number, $event)
-                "
-              >
-                <template v-if="!isReadonly && group.length > 1" #append>
-                  <VBtn
-                    aria-label="Remove answer"
-                    density="comfortable"
-                    icon="mdi-close"
-                    size="small"
-                    variant="text"
-                    @click="removeAnswer(groupIndex, index as number)"
-                  />
-                </template>
-              </VTextField>
-            </VSlideYTransition>
-            <div v-if="!isReadonly" class="d-flex justify-end">
-              <VBtn
-                prepend-icon="mdi-plus"
-                text="Add Answer"
-                variant="text"
-                @click="addAnswer(groupIndex)"
-              />
+            <div class="px-2 pb-1">
+              <VSlideYTransition group>
+                <VTextField
+                  v-for="(answer, index) in group"
+                  :key="`${groupIndex}.${index}`"
+                  :model-value="answer"
+                  :readonly="isReadonly"
+                  :rules="[rules.required]"
+                  class="my-2"
+                  density="comfortable"
+                  placeholder="Answer..."
+                  variant="outlined"
+                  hide-details
+                  @update:model-value="
+                    updateAnswer(groupIndex, index as number, $event)
+                  "
+                >
+                  <template #prepend>
+                    <VAvatar
+                      :text="String(index + 1)"
+                      class="text-label-medium font-weight-semibold"
+                      color="surface-container-highest"
+                      rounded="lg"
+                      size="small"
+                    />
+                  </template>
+                  <template v-if="!isReadonly" #append>
+                    <VBtn
+                      :disabled="group.length <= 1"
+                      aria-label="Remove answer"
+                      density="comfortable"
+                      icon="mdi-close"
+                      size="small"
+                      variant="text"
+                      @click="removeAnswer(groupIndex, index as number)"
+                    />
+                  </template>
+                </VTextField>
+              </VSlideYTransition>
+              <div v-if="!isReadonly" class="d-flex justify-center mt-3">
+                <VBtn
+                  prepend-icon="mdi-plus"
+                  text="Add Answer"
+                  variant="text"
+                  @click="addAnswer(groupIndex)"
+                />
+              </div>
             </div>
-          </div>
-        </template>
-      </Draggable>
-    </VInput>
+          </VSheet>
+        </VueDraggable>
+      </VInput>
+    </VExpandTransition>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { cloneDeep, map, pullAt, sortBy } from 'lodash-es';
+import { cloneDeep, concat, map, pullAt, sortBy, times } from 'lodash-es';
 import { computed, watch } from 'vue';
 import type { Element, ElementData } from '@tailor-cms/ce-fill-blank-manifest';
-import Draggable from 'vuedraggable/src/vuedraggable';
 import pluralize from 'pluralize-esm';
+import { VueDraggable } from 'vue-draggable-plus';
 
 const BLANK = /(@blank)/g;
 const SYNC_ERROR = `
@@ -119,6 +155,9 @@ const emit = defineEmits<{
 
 const elementData = computed(() => props.element.data);
 const isGradable = computed(() => elementData.value.isGradable);
+const hasGroups = computed(() => !!elementData.value.correct?.length);
+const showEmptyState = computed(() => isGradable.value && !hasGroups.value);
+const groups = computed(() => elementData.value.correct ?? []);
 
 const blankCount = computed(() => {
   const sortedEmbeds = sortBy(elementData.value.embeds, 'position');
@@ -133,6 +172,9 @@ const isSynced = computed(() => {
 
 const rules = {
   required: (val: string) => !!val || 'The field is required',
+  allFilled: (val: string[][]) =>
+    val.every((group) => group.every((it) => !!it)) ||
+    'All answers are required',
   isSynced: (val: string[][]) => val.length === blankCount.value || SYNC_ERROR,
   hasBlanks: (val: string) =>
     !!val.match(BLANK) || 'At least one @blank required.',
@@ -170,8 +212,10 @@ watch(blankCount, (val) => {
   if (!isGradable.value || !elementData.value.correct) return;
   const diff = val - elementData.value.correct.length;
   if (diff <= 0) return;
-  const correct = cloneDeep(elementData.value.correct);
-  correct.push(...Array(diff).fill(['']));
+  const correct = concat(
+    elementData.value.correct,
+    times(diff, () => ['']),
+  );
   emit('update', { correct });
 });
 </script>
