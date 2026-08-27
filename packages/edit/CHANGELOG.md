@@ -1,5 +1,11 @@
 # @tailor-cms/ce-fill-blank-edit
 
+## 2.1.1
+
+### Patch Changes
+
+- Migrate to latest tce-boot version and refactor question edit componen
+
 ## 2.1.0
 
 ### Minor Changes
